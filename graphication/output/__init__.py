@@ -1,0 +1,53 @@
+"""
+Output modules
+"""
+
+
+class FileOutput(object):
+	
+	"""
+	Base class for output. Has methods for item management and layout calculations.
+	"""
+	
+	types = {}
+	
+	def __init__(self, style):
+		self.style = style
+		self.items = {}
+	
+	
+	def add_item(self, item, x, y, width, height):
+		"""Adds an item to this Output. Pass in its position and size, as floats or ints."""
+		
+		self.items[item] = ((x,y), (width, height))
+	
+	
+	def calculate_size(self):
+		"""Calculates the bounds of the page"""
+		right, bottom = 0,0
+		for (x, y), (w, h) in self.items.values():
+			if x + w > right:
+				right = x + w
+			if y + h > bottom:
+				bottom = y + h
+		return (right, bottom)
+	
+	
+	def render_loop(self, context):
+		"""Renders items in a generic fashion. Should be passed a context."""
+		for item, ((x, y), (w, h)) in self.items.items():
+			context.save()
+			context.translate(x, y)
+			item.set_size(w, h)
+			item.render(context)
+			context.restore()
+	
+	def write(self, type, destination):
+		if type not in self.types:
+			raise ValueError("Don't know how to write type '%s'." % type)
+		self.types[type](self, destination)
+
+
+
+import graphication.output.svg
+import graphication.output.png
