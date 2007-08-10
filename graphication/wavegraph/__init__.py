@@ -31,7 +31,7 @@ class WaveGraph(object):
 		
 		self.style = style
 		
-		self.curves = WaveGraphCurves(mseries, vextent=self.style['wavegraph:vertical_extent'])
+		self.curves = WaveGraphCurves(mseries, yoffset=self.style['wavegraph:vertical_center'], vextent=self.style['wavegraph:vertical_extent'])
 		
 		# Sort the labels into minor and major
 		x_lines_minor, x_labels_major = [], {}

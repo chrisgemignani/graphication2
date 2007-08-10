@@ -2,6 +2,13 @@
 
 class Style(object):
 	
+	"""
+	A Style determines how a graph is drawn.
+	Options can be specific (e.g. to a graph or output type). If a specific
+	option is asked for and it doesn't exist, the 'default' dict will be
+	searched as a fallback.
+	"""
+	
 	def __init__(self):
 		
 		self.styles = {
@@ -19,8 +26,9 @@ class Style(object):
 			},
 			"wavegraph": {
 				"curve_label_color": "#fff",
-				"vertical_extent": 0.9,
-				"smoothness": 0.25,
+				"vertical_extent": 0.9,        # How much of the vertical space the highest peak occupies
+				"vertical_center": 0.5,        # The vertical center; 1 turns it into a histogram
+				"smoothness": 0.3,             # From 0 - 1, how 'smooth' the curves are.
 			},
 		}
 	
