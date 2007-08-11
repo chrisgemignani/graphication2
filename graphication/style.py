@@ -7,6 +7,9 @@ class Style(object):
 	Options can be specific (e.g. to a graph or output type). If a specific
 	option is asked for and it doesn't exist, the 'default' dict will be
 	searched as a fallback.
+	There is also inheritance; if curve_label_color isn't found, then it will
+	look for label_color and then color. This happens before falling back to
+	the default style.
 	"""
 	
 	def __init__(self):
@@ -19,7 +22,9 @@ class Style(object):
 				"grid_major_width": 2,
 				"label_color": "#999",
 				"label_size": 15,
-				"label_font": "Sans",
+				"font": "Sans",
+				"font_weight": "normal",
+				"debug": False,
 			},
 			"png": {
 				"background": "#ffff",
@@ -29,8 +34,19 @@ class Style(object):
 				"vertical_extent": 0.9,        # How much of the vertical space the highest peak occupies
 				"vertical_center": 0.5,        # The vertical center; 1 turns it into a histogram
 				"smoothness": 0.3,             # From 0 - 1, how 'smooth' the curves are.
+				"label_accuracy": 5,           # The higher it is, the better the on-curve labels fit (and the longer to render)
+				"curve_label_spacing": 200,    # The minimum amount of space between on-curve labels
+				"dimming_top": 0,              # The on-label size below which labels are make more transparent
+				"dimming_bottom": 0,           # The on-label size at which labels are completely dimmed/invisible
 			},
 		}
+	
+	
+	def get_levels(self, key):
+		"""Splits a key into its various inheritance levels."""
+		parts = key.split("_")
+		for i in range(len(parts), 0, -1):
+			yield "_".join(parts[-i:])
 	
 	
 	def __getitem__(self, key):
@@ -41,9 +57,13 @@ class Style(object):
 			type = "default"
 		
 		if type in self.styles:
-			if key in self.styles[type]:
-				return self.styles[type][key]
-		return self.styles['default'][key]
+			for subkey in self.get_levels(key):
+				if subkey in self.styles[type]:
+					return self.styles[type][subkey]
+		if type == "default":
+			raise ValueError("'%s' was not found, nor does it have an inherited value." % key)
+		else:
+			return self[key]
 	
 	
 	def __setitem__(self, key, value):

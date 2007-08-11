@@ -10,10 +10,15 @@ def write(self, filename):
 	@type filename: str
 	"""
 	
-	# Create a SVG context
+	# Create an image context
 	import cairo
 	width, height = self.calculate_size()
 	surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+	
+	# Make sure it renders fonts using gray-based antialiasing
+	font_options = surface.get_font_options()
+	font_options.set_antialias(cairo.ANTIALIAS_GRAY)
+	
 	context = cairo.Context(surface)
 	
 	# Render the background

@@ -32,7 +32,6 @@ class WaveGraphCurveLabels(object):
 		"""
 		
 		self.wavegraph = wavegraph
-		self.calc_positions()
 	
 	
 	def interpolate(self, points, accuracy):
@@ -56,10 +55,45 @@ class WaveGraphCurveLabels(object):
 			
 			newpoints.append((oldx, oldy))
 			for fraction in fractions:
-				newpoints.append((oldx+(fraction*newx), oldy+(fraction*newy)))
+				newpoints.append((oldx+(fraction*(newx-oldx)), oldy+(fraction*(newy-oldy))))
 		
-		newpoints.append(newx, newy)
+		newpoints.append((newx, newy))
 		return newpoints
+	
+	
+	def rect_union(self, (rect1, rect2)):
+		
+		a1, b1, a2, b2 = rect1
+		x1, y1, x2, y2 = rect2
+		
+		left = min(a1, x1)
+		right = max(a2, x2)
+		top = max(b1, y1)
+		if (b1 > y2) or (y1 > b2):
+			bottom = top
+		else:
+			bottom = min(b2, y2)
+		
+		return (left, top, right, bottom)
+	
+	
+	def get_text_ratio(self, text):
+		return len(text)/1.8
+	
+	
+	def get_text_size(self, ratio, (x1, y1, x2, y2)):
+		width = abs(x2-x1)
+		height = abs(y2-y1)
+		
+		if (width == 0) or (height == 0):
+			return 0
+		
+		this_ratio = width/float(height)
+		
+		if this_ratio > ratio:
+			return height
+		else:
+			return width/float(ratio)
 	
 	
 	def calc_positions(self, accuracy=5):
@@ -68,17 +102,58 @@ class WaveGraphCurveLabels(object):
 		Calculates the positions of the text.
 		"""
 		
+		self.labels = []
+		
+		# For each series...
 		for i in range(len(self.wavegraph.mseries.series)):
-			series = self.wavegraph.mseries.get_series[i]
+			# Get the series, and the label's width/height ratio
+			series = self.wavegraph.mseries.get_series(i)
+			ratio = self.get_text_ratio(series.title)
 			
+			# Get the curve points, and interpolate along them
 			tops = self.interpolate(self.wavegraph.points[i], accuracy)
 			bottoms = self.interpolate(self.wavegraph.points[i+1], accuracy)
 			
-			boxes = [(l,t,r,b) for (l,t), (r,b) in zip(tops[:-1], bottoms[1:])]
-			print boxes
+			# Work out bounding boxes for these points
+			boxes = []
+			for i in range(len(tops)-1):
+				tl = tops[i]
+				tr = tops[i+1]
+				bl = bottoms[i]
+				br = bottoms[i+1]
+				
+				boxes.append((tl[0], max(tl[1], tr[1]), br[0], min(bl[1], br[1])))
+			
+			# Go through and union them to collect a set of bigger boxes
+			bigboxes = [boxes]
+			for i in range(accuracy*2):
+				bigboxes.append(map(self.rect_union, off_zip(bigboxes[-1])))
+			
+			# Reduce that into a single list, rather than a list of lists
+			bigboxes = reduce(lambda a, b: a+b, bigboxes)
+			
+			# Associate each box with its appropriate text size, then sort
+			bigboxes = [(self.get_text_size(ratio, rect), rect) for rect in bigboxes]
+			bigboxes.sort()
+			
+			self.labels.append((bigboxes[-1], series.title))
+	
+	
+	def render_debug(self, context):
+		
+		"""Renders the calculation rectangles"""
+		
+		context.save()
+		context.set_source_rgba(*hex_to_rgba("#f006"))
+		
+		for (size, (x1, y1, x2, y2)), title in self.labels:
+			context.rectangle(x1, y1, x2-x1, y2-y1)
+			context.stroke()
+		
+		context.restore()
 		
 	
-	def render(self, context):
+	def render(self, context, color, font="Sans", weight="normal", vertical_extent=0.8, dimming_top=0, dimming_bottom=0):
 		
 		"""
 		Renders the text onto the specified context.
@@ -88,7 +163,40 @@ class WaveGraphCurveLabels(object):
 		@type content: cairo.Context
 		"""
 		
-		pass
+		weights = {
+			"normal": cairo.FONT_WEIGHT_NORMAL,
+			"bold": cairo.FONT_WEIGHT_BOLD,
+		}
+		
+		# Initialise context
+		context.save()
+		r,g,b,a = hex_to_rgba(color)
+		context.select_font_face(font, cairo.FONT_SLANT_NORMAL, weights[weight.lower()])
+		
+		# Draw the labels
+		for (size, (x1, y1, x2, y2)), title in self.labels:
+			# Set the colour, including dimming
+			if size >= dimming_top:
+				dim = 1
+			elif size < dimming_bottom:
+				dim = 0
+			else:
+				dim = (size-dimming_bottom) / float(dimming_top-dimming_bottom)
+			context.set_source_rgba(r,g,b,a*dim)
+			
+			# Position outselves
+			context.set_font_size(size*vertical_extent)
+			x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
+			context.move_to(((x2+x1)/2.0) - width / 2 - x_bearing, ((y2+y1)/2.0) - height / 2 - y_bearing)
+			
+			# Draw the text. We use text_path because it looks prettier 
+			# (on image surfaces, show_text coerces font paths to fit inside pixels)
+			#context.show_text(title)
+			context.text_path(title)
+			
+			context.fill()
+		
+		context.restore()
 
 
 

@@ -51,3 +51,4 @@ class FileOutput(object):
 
 import graphication.output.svg
 import graphication.output.png
+import graphication.output.pdf

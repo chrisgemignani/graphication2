@@ -54,6 +54,12 @@ class WaveGraph(object):
 		else:
 			self.grid_major = None
 			self.x_labels_major = None
+		
+		# Create on-curve labels if wanted
+		if label_curves:
+			self.curve_labels = WaveGraphCurveLabels(self.curves)
+		else:
+			self.curve_labels = None
 	
 	
 	def set_size(self, width, height):
@@ -82,10 +88,15 @@ class WaveGraph(object):
 		
 		if self.x_labels_major:
 			self.x_labels_major.set_size(self.cwidth, self.style['wavegraph:label_size'] * 3)
-	
-	
-	def render(self, context):
 		
+		# Recalculate the curve labels if needed
+		if self.curve_labels:
+			self.curve_labels.calc_positions(self.style['wavegraph:label_accuracy'])
+	
+	
+	def render(self, context, debug=False):
+		
+		# Render the grid[s] if needed
 		if self.grid_minor:
 			self.grid_minor.render(context,
 				color=self.style['wavegraph:grid_minor_color'],
@@ -98,10 +109,12 @@ class WaveGraph(object):
 				thickness=self.style['wavegraph:grid_major_width'],
 			)
 		
+		# The main curves
 		self.curves.render(context,
 			smooth=self.style['wavegraph:smoothness'],
 		)
 		
+		# Do we need labels on the bottom?
 		if self.x_labels_major:
 			context.save()
 			context.translate(0, self.cheight)
@@ -111,3 +124,15 @@ class WaveGraph(object):
 				font=self.style['wavegraph:label_font'],
 			)
 			context.restore()
+		
+		# Render the curve labels if needed
+		if self.curve_labels:
+			if self.style['wavegraph:debug']:
+				self.curve_labels.render_debug(context)
+			self.curve_labels.render(context,
+				color=self.style['wavegraph:curve_label_color'],
+				font=self.style['wavegraph:curve_label_font'],
+				weight=self.style['wavegraph:curve_label_font_weight'],
+				dimming_top=self.style['wavegraph:dimming_top'],
+				dimming_bottom=self.style['wavegraph:dimming_bottom'],
+			)

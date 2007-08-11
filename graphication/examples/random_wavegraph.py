@@ -15,6 +15,7 @@ for i in range(6):
 # Initialise our Style
 from graphication.style import Style
 style = Style()
+style['wavegraph:dimming_top'] = 20
 
 # Create the output
 output = FileOutput(style)
@@ -24,9 +25,10 @@ labels = dict([(x, str(x)) for x in range(num_points)])
 labels.update(dict([(x+0.5, None) for x in range(num_points-1)]))
 
 # OK, render that.
-wg = WaveGraph(mseries, style, labels)
-output.add_item(wg, x=0, y=30, width=800, height=300)
+wg = WaveGraph(mseries, style, labels, True)
+output.add_item(wg, x=0, y=30, width=500, height=200)
 
 # Save the images
 output.write("svg", "test.svg")
 output.write("png", "test.png")
+output.write("pdf", "test.pdf")
