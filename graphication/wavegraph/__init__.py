@@ -91,7 +91,11 @@ class WaveGraph(object):
 		
 		# Recalculate the curve labels if needed
 		if self.curve_labels:
-			self.curve_labels.calc_positions(self.style['wavegraph:label_accuracy'])
+			self.curve_labels.calc_positions(
+				accuracy=self.style['wavegraph:label_accuracy'],
+				max_per_curve=self.style['wavegraph:curve_label_maxcount'],
+				spacing=self.style['wavegraph:curve_label_spacing'],
+			)
 	
 	
 	def render(self, context, debug=False):

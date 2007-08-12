@@ -3,6 +3,7 @@
 import random
 from graphication.output import FileOutput
 from graphication.wavegraph import WaveGraph
+from graphication.label import Label
 from graphication.series import MultiSeries, SubSeries
 
 # Create a random multiseries
@@ -16,6 +17,10 @@ for i in range(6):
 from graphication.style import Style
 style = Style()
 style['wavegraph:dimming_top'] = 20
+style['label:align'] = "left"
+style['label:color'] = "#222"
+style['default:font'] = "NeoSansLight"
+style['label:font'] = "NeoSansNormal"
 
 # Create the output
 output = FileOutput(style)
@@ -26,6 +31,9 @@ labels.update(dict([(x+0.5, None) for x in range(num_points-1)]))
 
 # OK, render that.
 wg = WaveGraph(mseries, style, labels, True)
+lb = Label("Test Graph", style)
+
+output.add_item(lb, x=10, y=5, width=490, height=20)
 output.add_item(wg, x=0, y=30, width=500, height=200)
 
 # Save the images

@@ -20,6 +20,9 @@ def off_zip(l, n=2):
 	return zip(*ls)
 
 
+class TooClose(Exception): pass
+
+
 class WaveGraphCurveLabels(object):
 	
 	def __init__(self, wavegraph):
@@ -96,7 +99,7 @@ class WaveGraphCurveLabels(object):
 			return width/float(ratio)
 	
 	
-	def calc_positions(self, accuracy=5):
+	def calc_positions(self, accuracy=5, max_per_curve=20, spacing=200):
 		
 		"""
 		Calculates the positions of the text.
@@ -135,8 +138,34 @@ class WaveGraphCurveLabels(object):
 			# Associate each box with its appropriate text size, then sort
 			bigboxes = [(self.get_text_size(ratio, rect), rect) for rect in bigboxes]
 			bigboxes.sort()
+			bigboxes.reverse()
 			
-			self.labels.append((bigboxes[-1], series.title))
+			# Choose boxes in order of decending size, so they don't overlap
+			taken = []
+			for box in bigboxes:
+				
+				# If we have enough boxes, break
+				if len(taken) >= max_per_curve:
+					break
+				
+				# Check this isn't too close
+				text_size, (left, top, right, bottom) = box
+				try:
+					for taken_left, taken_right in taken:
+						if abs(left - taken_left) < spacing:
+							raise TooClose
+						elif abs(right - taken_right) < spacing:
+							raise TooClose
+						elif abs(right - taken_left) < spacing:
+							raise TooClose
+						elif abs(left - taken_right) < spacing:
+							raise TooClose
+				except TooClose:
+					continue
+				
+				# OK, use this one
+				taken.append((left, right))
+				self.labels.append((box, series.title))
 	
 	
 	def render_debug(self, context):
@@ -243,14 +272,14 @@ class WaveGraphAxisLabels(object):
 			if "\n" in text:
 				line1, line2 = text.split("\n", 1)
 				x_bearing, y_bearing, width, height = context.text_extents(line1)[:4]
-				context.move_to(x - width / 2 - x_bearing, self.line1_height - height / 2 - y_bearing)
+				context.move_to(x - width / 2.0 - x_bearing, self.line1_height - height / 2.0 - y_bearing)
 				context.show_text(line1)
 				x_bearing, y_bearing, width, height = context.text_extents(line2)[:4]
-				context.move_to(x - width / 2 - x_bearing, self.line2_height - height / 2 - y_bearing)
+				context.move_to(x - width / 2.0 - x_bearing, self.line2_height - height / 2.0 - y_bearing)
 				context.show_text(line2)
 			else:
 				x_bearing, y_bearing, width, height = context.text_extents(text)[:4]
-				context.move_to(x - width / 2 - x_bearing, self.mid_height - height / 2 - y_bearing)
+				context.move_to(x - width / 2.0 - x_bearing, self.mid_height - height / 2.0 - y_bearing)
 				context.show_text(text)
 		
 		context.restore()

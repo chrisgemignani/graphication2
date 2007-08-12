@@ -25,6 +25,10 @@ class Style(object):
 				"font": "Sans",
 				"font_weight": "normal",
 				"debug": False,
+				"align": "center",
+			},
+			"label": {
+				"vertical_extent": 1.0,
 			},
 			"png": {
 				"background": "#ffff",
@@ -35,6 +39,7 @@ class Style(object):
 				"vertical_center": 0.5,        # The vertical center; 1 turns it into a histogram
 				"smoothness": 0.3,             # From 0 - 1, how 'smooth' the curves are.
 				"label_accuracy": 5,           # The higher it is, the better the on-curve labels fit (and the longer to render)
+				"curve_label_maxcount": 10,    # The maximum number of labels on any given curve
 				"curve_label_spacing": 200,    # The minimum amount of space between on-curve labels
 				"dimming_top": 0,              # The on-label size below which labels are make more transparent
 				"dimming_bottom": 0,           # The on-label size at which labels are completely dimmed/invisible
