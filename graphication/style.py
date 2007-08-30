@@ -26,6 +26,10 @@ class Style(object):
 				"font_weight": "normal",
 				"debug": False,
 				"align": "center",
+				"point_radius": 7,
+				"link_width": 2,
+				"link_color": "#600",
+				"label_padding": 10,
 			},
 			"label": {
 				"vertical_extent": 1.0,
