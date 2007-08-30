@@ -1,7 +1,10 @@
 
 
+class BaseScale(object):
+	pass
 
-class SimpleScale(object):
+
+class SimpleScale(BaseScale):
 	
 	def __init__(self, min, max, step, padding=0):
 		

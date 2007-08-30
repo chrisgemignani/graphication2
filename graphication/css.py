@@ -11,7 +11,7 @@ Any @media, @import, etc. parts are also entirely useless. As is !important.
 Copyright Andrew Godwin, 2007
 Released under the terms of the GPL, version 3.
 
-$Id:$
+$Id$
 """
 
 import re
@@ -283,6 +283,21 @@ class CssStylesheet(object):
 	
 	# Useful shorthand
 	props = get_properties_str
+	
+	
+	def update(self, stylesheet):
+		
+		"""
+		Updates this stylesheet with rules from the other one, with the other
+		stylesheet's rules taking preference.
+		
+		@param stylesheet: The stylesheet to update from.
+		@type stylesheet: CssStylesheet
+		"""
+		
+		# TODO: A more sophisticated update that removes duplicates.
+		self.rules += stylesheet.rules
+		self.rules.sort(key=lambda r: r.selector.specificity)
 	
 	
 	def __repr__(self):
