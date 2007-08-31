@@ -212,6 +212,38 @@ class CssProperties(UserDict):
 	def get_list(self, key, default):
 		"""Like dict.get, but splits the result as a comma-separated list."""
 		return [x.strip() for x in self.get(key, default).split(",")]
+	
+	
+	def get_align(self, key, default):
+		"""Like dict.get, but always returns a number between 0 and 1.
+		Correctly interprets 'top', 'left', 'middle', 'center', etc., as well
+		as percentages."""
+		val = self.get(key, default)
+		
+		# Try percentages or keywords
+		if isinstance(val, str) or isinstance(val, unicode):
+			if str[-1] == "%":
+				val = float(str[:-1]) / 100.0
+			else:
+				val = {
+					"left": 0.0,
+					"top": 0.0,
+					"middle": 0.5,
+					"center": 0.5,
+					"centre": 0.5,
+					"bottom": 1.0,
+					"right": 1.0,
+				}[val]
+		
+		# Make sure it's valid
+		try:
+			val = float(val)
+		except ValueError:
+			raise ValueError("Invalid value for alignment key '%s': %s" % (key, val))
+		
+		assert (val >= 0) and (val <= 1), "Alignment key '%s' must have a value between 0 and 1, not %s." % (key, val)
+		
+		return val
 
 
 

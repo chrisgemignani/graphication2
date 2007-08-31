@@ -29,6 +29,10 @@ point {
 	radius: 6;
 }
 
+wavegraph {
+	vertical-align: middle;
+}
+
 wavegraph curve {
 	smoothness: 0.3;
 }
