@@ -22,7 +22,7 @@ def write(self, filename):
 	context = cairo.Context(surface)
 	
 	# Render the background
-	context.set_source_rgba(*hex_to_rgba(self.style['png:background']))
+	context.set_source_rgba(*self.style['canvas.png'].get_color("background-color"))
 	context.paint()
 	
 	# Do the rendering

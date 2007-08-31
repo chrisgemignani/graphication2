@@ -6,21 +6,26 @@
 	font-family: Sans;
 }
 
-label {
-	color: #999;
-	font-size: 12;
+canvas {
+	background-color: #ffff;
 }
 
-grid minor line {
+label {
+	color: #333;
+	font-size: 12;
+	text-align: left;
+}
+
+grid.minor line {
 	width: 1;
 	color: #eee;
 }
 
-grid minor label {
+grid.minor label {
 	font-size: 0;
 }
 
-grid major line {
+grid.major line {
 	width: 2;
 	color: #ddd;
 }
@@ -31,6 +36,7 @@ point {
 
 wavegraph {
 	vertical-align: middle;
+	height: 90%;
 }
 
 wavegraph curve {

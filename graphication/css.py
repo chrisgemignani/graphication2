@@ -17,6 +17,9 @@ $Id$
 import re
 from UserDict import UserDict
 
+import sys, os
+from os.path import isdir, join, exists, abspath
+
 def selector_split(string, single_class=True):
 	
 	"""
@@ -62,6 +65,38 @@ def selector_split(string, single_class=True):
 		details.append((tag, id, cls))
 	
 	return details
+
+
+
+def hex_to_rgba(color):
+	
+	"""
+	Converts a hex colour to a RGBA sequence.
+	If passed an RGBA sequence, will return it normally.
+	
+	@param color: The color to translate.
+	@type color: str, 4-tuple or 4-list
+	"""
+	
+	if not isinstance(color, str) or isinstance(color, unicode):
+		try:
+			r,g,b,a = color
+			return r,g,b,a
+		except (TypeError, ValueError):
+			pass
+	
+	color = color.replace("#", "")
+	
+	if len(color) in [3,4]:
+		color = "".join([c*2 for c in color])
+	
+	hex_r, hex_g, hex_b = color[:2], color[2:4], color[4:6]
+	hex_a = color[6:8]
+	if not hex_a:
+		hex_a = "ff"
+	
+	return map(lambda x: int(x, 16)/255.0, [hex_r, hex_g, hex_b, hex_a])
+
 
 
 class CssSelector(object):
@@ -204,17 +239,22 @@ class CssProperties(UserDict):
 	"""
 	
 	
-	def get_int(self, key, default):
+	def get_int(self, key, default=0):
 		"""Like dict.get, but coerces the result to an integer."""
 		return int(self.get(key, default))
 	
 	
-	def get_list(self, key, default):
+	def get_float(self, key, default=0):
+		"""Like dict.get, but coerces the result to a float."""
+		return float(self.get(key, default))
+	
+	
+	def get_list(self, key, default=[]):
 		"""Like dict.get, but splits the result as a comma-separated list."""
 		return [x.strip() for x in self.get(key, default).split(",")]
 	
 	
-	def get_align(self, key, default):
+	def get_align(self, key, default=0.5):
 		"""Like dict.get, but always returns a number between 0 and 1.
 		Correctly interprets 'top', 'left', 'middle', 'center', etc., as well
 		as percentages."""
@@ -222,8 +262,8 @@ class CssProperties(UserDict):
 		
 		# Try percentages or keywords
 		if isinstance(val, str) or isinstance(val, unicode):
-			if str[-1] == "%":
-				val = float(str[:-1]) / 100.0
+			if val[-1] == "%":
+				val = float(val[:-1]) / 100.0
 			else:
 				val = {
 					"left": 0.0,
@@ -244,6 +284,17 @@ class CssProperties(UserDict):
 		assert (val >= 0) and (val <= 1), "Alignment key '%s' must have a value between 0 and 1, not %s." % (key, val)
 		
 		return val
+	
+	
+	def get_color(self, key="color", default="#000"):
+		color = self.get(key, default)
+		color = hex_to_rgba(color)
+		return color
+	
+	
+	def get_weight(self, key="font-weight", default="normal"):
+		weight = self.get(key, default).lower()
+		return weight
 
 
 
@@ -313,8 +364,8 @@ class CssStylesheet(object):
 		return self.get_properties(element)
 	
 	
-	# Useful shorthand
-	props = get_properties_str
+	# Useful shorthands
+	__getitem__ = props = get_properties_str
 	
 	
 	def update(self, stylesheet):
@@ -431,9 +482,6 @@ class CssImporter(object):
 	exts = [".css"]
 	
 	def find_module(self, fullname, path=None):
-		
-		import sys, os
-		from os.path import isdir, join, exists, abspath
 		
 		name = fullname.split('.')[-1]
 		

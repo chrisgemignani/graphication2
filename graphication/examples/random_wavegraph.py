@@ -13,7 +13,7 @@ for i in range(6):
 
 # Initialise our style
 css.install_hook()
-import graphication.default_css as stylesheet
+import graphication.default_css as style
 
 # Create the output
 output = FileOutput(style)
@@ -22,7 +22,7 @@ output = FileOutput(style)
 scale = SimpleScale(0, num_points, 1)
 
 # OK, render that.
-wg = WaveGraph(mseries, stylesheet, scale, True)
+wg = WaveGraph(mseries, style, scale, True)
 lb = Label("Test Graph", style)
 
 output.add_item(lb, x=10, y=5, width=490, height=20)
