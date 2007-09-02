@@ -258,8 +258,8 @@ class CssProperties(UserDict):
 		"""Like dict.get, but always returns a number between 0 and 1.
 		Correctly interprets 'top', 'left', 'middle', 'center', etc., as well
 		as percentages."""
-		val = self.get(key, default)
 		
+		val = self.get(key, default)
 		# Try percentages or keywords
 		if isinstance(val, str) or isinstance(val, unicode):
 			if val[-1] == "%":
@@ -287,14 +287,95 @@ class CssProperties(UserDict):
 	
 	
 	def get_color(self, key="color", default="#000"):
+		"""Like dict.get, but parses the result as a colour
+		(#xxx, #xxxx, #xxxxxx or #xxxxxxxx) and returns a (r,g,b,a) tuple."""
 		color = self.get(key, default)
 		color = hex_to_rgba(color)
 		return color
 	
 	
-	def get_weight(self, key="font-weight", default="normal"):
+	def get_font_weight(self, key="font-weight", default="normal"):
+		"""Like dict.get, but normalises the value into a font weight."""
 		weight = self.get(key, default).lower()
 		return weight
+	
+	
+	def get_cairo_font_weight(self, key="font-weight", default="normal"):
+		"""Like dict.get, but returns the value as a Cairo font weight."""
+		
+		weight = self.get_font_weight(key, default)
+		
+		import cairo
+		return {
+			"normal": cairo.FONT_WEIGHT_NORMAL,
+			"bold": cairo.FONT_WEIGHT_BOLD,
+		}[weight]
+	
+	
+	def get_font_style(self, key="font-style", default="normal"):
+		"""Like dict.get, but normalises the value into a font style."""
+		weight = self.get(key, default).lower()
+		return weight
+	
+	
+	def get_cairo_font_style(self, key="font-style", default="normal"):
+		"""Like dict.get, but returns the value as a Cairo font style."""
+		
+		style = self.get_font_style(key, default)
+		
+		import cairo
+		return {
+			"normal": cairo.FONT_SLANT_NORMAL,
+			"italic": cairo.FONT_SLANT_ITALIC,
+		}[style]
+	
+	
+	def get_font(self, key="font-family", default=None):
+		"""Like dict.get, but will pick the first font in the
+		result list that exists, and fall back to a sensible
+		default otherwise."""
+		
+		fonts = self.get_list(key)
+		
+		# TODO: Detect if a font exists on the system or not.
+		for font in fonts:
+			return font
+		
+		if default:
+			return default
+		else:
+			# TODO: Platform-specific default fonts.
+			return "Sans"
+	
+	
+	def get_properties(self, element):
+		
+		"""
+		Returns the properties for the element 'element' below this one.
+		
+		@param element: An element-list of (tag, id, [classes]) tuples
+		@type element: list
+		"""
+		
+		return self.stylesheet.get_properties(self.root + element)
+	
+	
+	def get_properties_str(self, element_str):
+		
+		"""
+		Returns the properties for the element 'element' below this one, 
+		using a selector-like shorthand syntax for the element.
+		
+		@param element: A CSS-selector like string (can have .multiple.classes)
+		@type element: str
+		"""
+		
+		element = selector_split(element_str, False)
+		return self.get_properties(element)
+	
+	
+	# Useful shorthands
+	sub = props = get_properties_str
 
 
 
@@ -347,7 +428,10 @@ class CssStylesheet(object):
 			if rule.selector.matches(element):
 				properties.update(rule.properties)
 		
-		return CssProperties(properties)
+		props = CssProperties(properties)
+		props.stylesheet = self
+		props.root = element
+		return props
 	
 	
 	def get_properties_str(self, element_str):

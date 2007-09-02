@@ -6,7 +6,7 @@ class BaseScale(object):
 
 class SimpleScale(BaseScale):
 	
-	def __init__(self, min, max, step, padding=0):
+	def __init__(self, min, max, step=1, padding=0):
 		
 		"""
 		Constructor.

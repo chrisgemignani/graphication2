@@ -30,12 +30,8 @@ class Label(object):
 		props = self.style['label']
 		
 		# Get the font weight, and the font
-		weights = {
-			"normal": cairo.FONT_WEIGHT_NORMAL,
-			"bold": cairo.FONT_WEIGHT_BOLD,
-		}
-		weight = weights[props.get_weight("font-weight")]
-		font = props.get("font-family", None)
+		weight = props.get_cairo_font_weight()
+		font = props.get_font()
 		
 		# Get the alignment
 		align = props.get_align("text-align")

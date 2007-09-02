@@ -1,18 +1,75 @@
 
-from graphication.color import hex_to_rgba
+from graphication.css import hex_to_rgba
 
-class SubSeries(object):
+
+class OrderedDict(object):
 	
-	"""Holds one subset of data, with values and a title."""
+	def __init__(self, pairs):
+		self.dict = {}
+		self.ordered = []
+		for key, value in pairs:
+			self.dict[key] = value
+			self.ordered.append(key)
 	
-	def __init__(self, title, values, color="#000000ff"):
+	def order(self):
+		self.ordered = self.dict.keys()
+		self.ordered.order()
+	
+	def keys(self):
+		return self.ordered
+	
+	def values(self):
+		return [self.dict[x] for x in self.ordered]
+	
+	def items(self):
+		return [(x, self.dict[x]) for x in self.ordered]
+	
+	def __getitem__(self, key):
+		return self.dict[key]
+	
+	def __setitem__(self, key, value):
+		self.dict[key] = value
+		if key not in self.dict:
+			self.ordered.append(key)
+
+
+
+class Series(object):
+	
+	"""Holds one set of data, with keys, values and a title."""
+	
+	def __init__(self, title, data, color="#000000ff"):
 		self.title = title
-		self.values = values
+		self.data = data
 		self.color = color.replace("#", "")
 	
 	
 	def color_as_rgba(self):
 		return hex_to_rgba(self.color)
+	
+	
+	def keys(self):
+		return map(lambda (x,y): x, self.items())
+	
+	
+	def values(self):
+		return map(lambda (x,y): y, self.items())
+	
+	
+	def items(self):
+		items = self.data.items()
+		items.sort()
+		return items
+	
+	
+	def key_range(self):
+		keys = self.data.keys()
+		return min(keys), max(keys)
+	
+	
+	def value_range(self):
+		values = self.data.values()
+		return min(values), max(values)
 	
 	
 	def __iter__(self):
@@ -25,6 +82,114 @@ class SubSeries(object):
 	
 	def __len__(self):
 		return len(self.values)
+	
+	
+	def interpolate(self, key):
+		"""
+		Returns the value at 'key', with linear interpolation, and
+		constant extrapolation.
+		"""
+		
+		keys = self.keys()
+		
+		if not keys:
+			raise ValueError("No values to interpolate between.")
+		
+		pre = keys[0]
+		post = None
+		
+		# Check to see if it needs to be extrapolated below.
+		if key < pre:
+			return self.data[pre]
+		
+		# Get the two values above and below it
+		for a_key in keys:
+			if a_key > key:
+				post = a_key
+				break
+			else:
+				pre = a_key
+		
+		# Extrapolate above?
+		if post is None:
+			return self.data[pre]
+		
+		# Interpolate
+		range = post - pre
+		pc = (key - pre) / float(range)
+		
+		bottom = self.data[pre]
+		top = self.data[post]
+		vrange = top - bottom
+		return top + (vrange * pc)
+
+
+
+class SeriesSet(object):
+	
+	"""
+	SeriesSets hold zero or more Series.
+	They have useful operations such as overall maxima, minima, etc.
+	Iterating over one will yield the series one-by-one.
+	"""
+	
+	def __init__(self, series=[]):
+		self.series = series
+	
+	
+	def __iter__(self):
+		return iter(self.series)
+	
+	
+	def add_series(self, series):
+		self.series.append(series)
+	
+	
+	def key_range(self):
+		mins, maxs = zip([series.key_range() for series in self.series])
+		return min(mins), max(maxs)
+	
+	
+	def value_range(self):
+		mins, maxs = zip([series.value_range() for series in self.series])
+		return min(mins), max(maxs)
+	
+	
+	def keys(self):
+		"""
+		Returns all possible keys, in order, in tuples with a list of series
+		they're in as the second element.
+		"""
+		
+		# TODO: This could be made a bit more efficient.
+		
+		keys = {}
+		for series in self.series:
+			for key in series.keys():
+				keys[key] = keys.get(key, []) + [series]
+		
+		items = keys.items()
+		items.sort()
+		return items
+	
+	
+	def stack(self, key):
+		"""Returns a list of (series, value-at-key) tuples for the series."""
+		
+		return map(lambda x:(x,x.interpolate(key)), self.series)
+	
+	
+	def stacks(self):
+		"""Returns a list of stacks for each possible key."""
+		
+		return map(self.stack, self.keys())
+	
+	
+	def totals(self):
+		"""Generates a list of (key, total-at-key) tuples, in key order."""
+		
+		for key in self.keys:
+			yield key, sum(map(lambda x:x.interpolate(key), self.series))
 
 
 
