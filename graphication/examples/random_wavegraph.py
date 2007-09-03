@@ -6,7 +6,7 @@ from graphication.wavegraph import WaveGraph
 
 # Create a random multiseries
 num_points = 10
-randomvalues = lambda n: [(i, random.choice(range(2,25))) for i in range(n)]
+randomvalues = lambda n: dict([(i, random.choice(range(2,25))) for i in range(n)])
 
 series_set = SeriesSet()
 for i in range(6):
@@ -24,7 +24,7 @@ import graphication.default_css as style
 output = FileOutput(style)
 
 # We'll have major lines every integer, and minor ones every half
-scale = SimpleScale(0, num_points, 1)
+scale = SimpleScale(0, num_points-1, 1)
 
 # OK, render that.
 wg = WaveGraph(series_set, style, scale, True)

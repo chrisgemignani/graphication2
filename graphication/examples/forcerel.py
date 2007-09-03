@@ -1,10 +1,8 @@
 #!/usr/bin/python
 
 import random
-from graphication.output import FileOutput
+from graphication import FileOutput, Node, NodeSet, NodeLink, Label, SimpleScale, css
 from graphication.forcerel import ForceRelPlot
-from graphication.series import Node, NodeSet, NodeLink
-from graphication.scales import SimpleScale
 
 # Create the NodeSet, and add some nodes to it
 nodeset = NodeSet()
@@ -24,8 +22,8 @@ value_min, value_max, value_range = nodeset.value_range()
 scale = SimpleScale(value_min, value_max, 1, 1)
 
 # Initialise our Style
-from graphication.style import Style
-style = Style()
+css.install_hook()
+import graphication.default_css as style
 
 # Create the output
 output = FileOutput(style)

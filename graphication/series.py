@@ -73,7 +73,7 @@ class Series(object):
 	
 	
 	def __iter__(self):
-		return iter(self.values)
+		return iter(self.data)
 	
 	
 	def __getitem__(self, key):
@@ -94,6 +94,9 @@ class Series(object):
 		
 		if not keys:
 			raise ValueError("No values to interpolate between.")
+		
+		if key in keys:
+			return self.data[key]
 		
 		pre = keys[0]
 		post = None
@@ -146,19 +149,20 @@ class SeriesSet(object):
 	
 	
 	def key_range(self):
-		mins, maxs = zip([series.key_range() for series in self.series])
+		mins, maxs = zip(*[series.key_range() for series in self.series])
 		return min(mins), max(maxs)
 	
 	
 	def value_range(self):
-		mins, maxs = zip([series.value_range() for series in self.series])
+		mins, maxs = zip(*[series.value_range() for series in self.series])
 		return min(mins), max(maxs)
 	
 	
-	def keys(self):
+	def keys(self, with_series=False):
 		"""
-		Returns all possible keys, in order, in tuples with a list of series
-		they're in as the second element.
+		Returns all possible keys, in order.
+		If 'with_series' is true, returns them as tuples, with the second element being the list
+		of series they appear in.
 		"""
 		
 		# TODO: This could be made a bit more efficient.
@@ -168,9 +172,12 @@ class SeriesSet(object):
 			for key in series.keys():
 				keys[key] = keys.get(key, []) + [series]
 		
-		items = keys.items()
-		items.sort()
-		return items
+		if with_series:
+			keys = keys.items()
+		else:
+			keys = keys.keys()
+		keys.sort()
+		return keys
 	
 	
 	def stack(self, key):
@@ -180,15 +187,15 @@ class SeriesSet(object):
 	
 	
 	def stacks(self):
-		"""Returns a list of stacks for each possible key."""
+		"""Returns a list of (key, stack) for each possible key."""
 		
-		return map(self.stack, self.keys())
+		return map(lambda x:(x, self.stack(x)), self.keys())
 	
 	
 	def totals(self):
 		"""Generates a list of (key, total-at-key) tuples, in key order."""
 		
-		for key in self.keys:
+		for key in self.keys():
 			yield key, sum(map(lambda x:x.interpolate(key), self.series))
 
 
@@ -274,56 +281,6 @@ class MultiSeries(object):
 		for serie in self.series:
 			yield serie.title
 
-
-
-class Series(object):
-	
-	"""
-	A single dataset. Has a series of points, a title and a color.
-	
-	Iterate over it to recieve (key, value) pairs, in-order.
-	"""
-	
-	def __init__(self, points, title="Series", color="#036"):
-		"""
-		Constructor.
-		
-		@param points: A dict of points to plot. Keys are the 'primary' values, values are their respective... values.
-		@type points: dict
-		
-		@param title: The title of the series
-		@type title: string
-		
-		@param color: The colour to draw the series
-		@type color: string
-		"""
-		
-		self.points = points
-		self.title = title
-		self.color = color
-	
-	
-	def __iter__(self):
-		items = self.points.items()
-		items.sort()
-		for item in items:
-			yield item
-	
-	
-	def key_range(self):
-		"""Returns a tuple of (min, max, range) for the set of key values."""
-		keys = self.points.keys()
-		this_max = max(keys)
-		this_min = min(keys)
-		return (this_min, this_max, this_max-this_min)
-	
-	
-	def value_range(self):
-		"""Returns a tuple of (min, max, range) for the set of value values."""
-		values = self.points.values()
-		this_max = max(values)
-		this_min = min(values)
-		return (this_min, this_max, this_max-this_min)
 
 
 class Node(object):

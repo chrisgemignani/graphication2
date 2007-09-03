@@ -22,11 +22,7 @@ def get_text_size(text, box_width, box_height, font="Sans", weight=cairo.FONT_WE
 	@type weight: cairo.FONT_WEIGHT_NORMAL or cairo.FONT_WEIGHT_BOLD
 	"""
 	
-	# Create a new surface and context
-	import cairo
-	surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 1, 1)
-	context = cairo.Context(surface)
-	width, height = context.text_extents(text)[2:4]
+	width, height = text_bounds(text, 10, font, weight)
 	ratio = width/float(height)
 	
 	if (box_width == 0) or (box_height == 0):
@@ -38,3 +34,15 @@ def get_text_size(text, box_width, box_height, font="Sans", weight=cairo.FONT_WE
 		return box_height
 	else:
 		return box_width/float(ratio)
+
+
+def text_bounds(text, size, font="Sans", style=cairo.FONT_SLANT_NORMAL, weight=cairo.FONT_WEIGHT_NORMAL):
+	# Create a new surface and context
+	surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 1, 1)
+	context = cairo.Context(surface)
+	
+	context.select_font_face(font, style, weight)
+	context.set_font_size(size)
+	
+	width, height = context.text_extents(text)[2:4]
+	return width, height

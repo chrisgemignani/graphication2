@@ -93,40 +93,59 @@ class ForceRelPlot(object):
 		
 		context.save()
 		
-		# Draw gridlines
-		context.set_line_width(self.style['forcerel:grid_major_width'])
-		context.set_source_rgba(*hex_to_rgba(self.style['forcerel:grid_major_color']))
+		major_style = self.style['forcerel grid.major']
+		minor_style = self.style['forcerel grid.minor']
 		
-		# Get lines, and setup label params
-		lines = list(self.y_scale.get_lines())
-		max_label_width = 0
-		pad_left = self.style['forcerel:left_label_padding']
-		pad_right = self.style['forcerel:right_label_padding']
-		context.select_font_face(self.style['forcerel:label_font'], cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-		context.set_font_size(self.style['forcerel:label_size'])
+		plot_left = 0
 		
-		# Draw labels
-		for line, title, ismajor in lines:
-			y = line * self.height
+		# Render the labels first
+		for linepos, title, ismajor in self.y_scale.get_lines():
 			
+			if ismajor:
+				this_style = major_style
+			else:
+				this_style = minor_style
+			
+			label_style = this_style.sub('label')
+			
+			context.select_font_face(
+				label_style.get_font(),
+				label_style.get_cairo_font_style(),
+				label_style.get_cairo_font_weight(),
+			)
+			context.set_font_size( label_style.get_float("font-size") )
+			
+			y = linepos * self.height
 			x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
-			context.move_to(pad_left - x_bearing, y - height / 2.0 - y_bearing)
+			padding = label_style.get_float("padding")
+			left = padding - x_bearing
+			
+			context.move_to(left - x_bearing, y - height / 2.0 - y_bearing)
 			context.show_text(title)
 			
-			max_label_width = max(width + x_bearing, max_label_width)
+			plot_left = max(left + width + padding, plot_left)
 		
 		
-		# Draw the gridlines
-		plot_left = max_label_width + pad_left + pad_right
-		plot_width = self.width - plot_left
-		
-		for line, title, ismajor in lines:
-			y = line * self.height
+		# Then the lines
+		for linepos, title, ismajor in self.y_scale.get_lines():
 			
+			if ismajor:
+				this_style = major_style
+			else:
+				this_style = minor_style
+			
+			line_style = this_style.sub('line')
+			
+			context.set_line_width(line_style.get_float("width"))
+			context.set_source_rgba(*line_style.get_color("color"))
+			
+			y = linepos * self.height
 			context.move_to(plot_left, y)
 			context.line_to(self.width, y)
 			context.stroke()
 		
+		
+		plot_width = self.width - plot_left
 		
 		# Work out node locations
 		for node in self.nodeset:
@@ -143,7 +162,7 @@ class ForceRelPlot(object):
 		
 		
 		# Draw nodes
-		r = self.style['forcerel:point_radius']
+		r = self.style['forcerel point'].get_float("radius")
 		for node in self.nodeset:
 			
 			context.set_source_rgba(*hex_to_rgba(node.color))

@@ -15,6 +15,11 @@ label {
 	color: #333;
 	font-size: 12;
 	text-align: left;
+	padding: 8;
+}
+
+grid label {
+	text-align: center;
 }
 
 grid.minor line {
