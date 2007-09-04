@@ -1,0 +1,46 @@
+/* Default Graphication CSS */
+
+* {
+	color: #000;
+	background-color: #fff;
+	font-family: NeoSansLight;
+	font-style: normal;
+}
+
+canvas {
+	background-color: #ffff;
+}
+
+label {
+	color: #333;
+	font-size: 12;
+	text-align: left;
+	padding: 8;
+}
+
+grid label {
+	text-align: center;
+}
+
+grid.minor line {
+	width: 1;
+	color: #eee;
+}
+
+grid.minor label {
+	font-size: 0;
+}
+
+grid.major line {
+	width: 1;
+	color: #ddd;
+}
+
+wavegraph {
+	vertical-align: middle;
+	height: 90%;
+}
+
+wavegraph curve {
+	smoothness: 0.3;
+}
