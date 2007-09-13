@@ -568,6 +568,8 @@ class CssImporter(object):
 	def find_module(self, fullname, path=None):
 		
 		name = fullname.split('.')[-1]
+		if name[-4:] == "_css":
+			name = name[:-4]
 		
 		# Get our paths
 		paths = sys.path
