@@ -136,8 +136,11 @@ class SeriesSet(object):
 	Iterating over one will yield the series one-by-one.
 	"""
 	
-	def __init__(self, series=[]):
-		self.series = series
+	def __init__(self, series=None):
+		if series is None:
+			self.series = []
+		else:
+			self.series = series
 	
 	
 	def __iter__(self):
