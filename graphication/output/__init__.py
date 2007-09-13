@@ -11,9 +11,10 @@ class FileOutput(object):
 	
 	types = {}
 	
-	def __init__(self, style):
+	def __init__(self, style, padding=0):
 		self.style = style
 		self.items = {}
+		self.padding = padding
 	
 	
 	def add_item(self, item, x, y, width, height):
@@ -30,14 +31,14 @@ class FileOutput(object):
 				right = x + w
 			if y + h > bottom:
 				bottom = y + h
-		return (right, bottom)
+		return (right+self.padding*2, bottom+self.padding*2)
 	
 	
 	def render_loop(self, context):
 		"""Renders items in a generic fashion. Should be passed a context."""
 		for item, ((x, y), (w, h)) in self.items.items():
 			context.save()
-			context.translate(x, y)
+			context.translate(x+self.padding, y+self.padding)
 			item.set_size(w, h)
 			item.render(context)
 			context.restore()

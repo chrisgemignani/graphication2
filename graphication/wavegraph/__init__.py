@@ -117,8 +117,6 @@ class WaveGraph(object):
 			line_style = this_style.sub('line')
 			label_style = this_style.sub('label')
 			
-			context.set_line_width(line_style.get_float("width"))
-			context.set_source_rgba(*line_style.get_color("color"))
 			context.select_font_face(
 				label_style.get_font(),
 				label_style.get_cairo_font_style(),
@@ -134,8 +132,11 @@ class WaveGraph(object):
 			align = label_style.get_align("text-align")
 			
 			context.move_to(x - (align * width), plot_height + padding + height / 2.0)
+			context.set_source_rgba(*label_style.get_color("color"))
 			context.show_text(title)
 			
+			context.set_line_width(line_style.get_float("width"))
+			context.set_source_rgba(*line_style.get_color("color"))
 			x = linepos * self.width
 			context.move_to(x, 0)
 			context.line_to(x, plot_height)
