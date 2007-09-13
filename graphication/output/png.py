@@ -29,7 +29,7 @@ def write(self, filename):
 	self.render_loop(context)
 	
 	# Write to a png
-	surface.write_to_png('test.png')
+	surface.write_to_png(filename)
 	surface.finish()
 
 
