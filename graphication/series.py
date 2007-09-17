@@ -56,6 +56,10 @@ class Series(object):
 		return map(lambda (x,y): y, self.items())
 	
 	
+	def sum(self):
+		return sum(self.values())
+	
+	
 	def items(self):
 		items = self.data.items()
 		items.sort()
@@ -159,6 +163,10 @@ class SeriesSet(object):
 	def value_range(self):
 		mins, maxs = zip(*[series.value_range() for series in self.series])
 		return min(mins), max(maxs)
+	
+	
+	def sum(self):
+		return sum([s.sum() for s in self.series])
 	
 	
 	def keys(self, with_series=False):
