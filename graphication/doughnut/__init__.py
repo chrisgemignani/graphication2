@@ -39,17 +39,18 @@ class Doughnut(object):
 		context.save()
 		
 		graph_style = self.style['doughnut']
-		outer_radius = self.center_x * graph_style['outer_radius']
-		inner_radius = self.center_x * graph_style['inner-radius']
+		outer_radius = self.center_x * graph_style.get_align('outer-radius', 1.0)
+		inner_radius = self.center_x * graph_style.get_align('inner-radius', 0.5)
 		
 		# Work out the ratios of each series
 		total = self.series_set.sum()
+		print total
 		
 		current_angle = -(math.pi / 2.0)
 		angle_step = (2*math.pi) / total
 		
 		for series in self.series_set:
-			new_angle = series.sum() * step
+			new_angle = series.sum() * angle_step + current_angle
 			context.move_to(*self.get_arc_point(outer_radius, current_angle))
 			context.arc(self.center_x, self.center_y, outer_radius, current_angle, new_angle)
 			context.line_to(*self.get_arc_point(inner_radius, new_angle))
@@ -57,5 +58,6 @@ class Doughnut(object):
 			context.close_path()
 			context.set_source_rgba(*series.color_as_rgba())
 			context.fill()
+			current_angle = new_angle
 		
 		context.restore()
