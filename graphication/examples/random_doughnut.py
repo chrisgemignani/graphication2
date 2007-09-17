@@ -14,12 +14,8 @@ for i in range(3):
 		colours[i%3]
 	))
 
-# Initialise our style
-css.install_hook()
-import graphication.default_css as style
-
 # Create the output
-output = FileOutput(style, 5)
+output = FileOutput(padding=5)
 
 # OK, render that.
 dn = Doughnut(series_set, style)

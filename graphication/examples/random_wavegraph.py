@@ -16,12 +16,8 @@ for i in range(6):
 		"#3366%2xff" % (50*i)
 	))
 
-# Initialise our style
-css.install_hook()
-import graphication.default_css as style
-
 # Create the output
-output = FileOutput(style)
+output = FileOutput()
 
 # We'll have major lines every integer, and minor ones every half
 scale = SimpleScale(0, num_points-1, 1)

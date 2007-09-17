@@ -2,6 +2,7 @@
 Output modules
 """
 
+import os
 from graphication import default_css
 
 class FileOutput(object):
