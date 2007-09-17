@@ -32,7 +32,7 @@ output = FileOutput(style)
 scale = SimpleScale(time.time() - 31557600, time.time(), 86400*7)
 
 # OK, render that.
-wg = WaveGraph(series_set, style, scale, True)
+wg = WaveGraph(series_set, scale, style, True)
 lb = Label(username, style)
 
 output.add_item(lb, x=10, y=5, width=490, height=20)

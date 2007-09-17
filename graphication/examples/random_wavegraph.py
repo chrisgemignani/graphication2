@@ -27,7 +27,7 @@ output = FileOutput(style)
 scale = SimpleScale(0, num_points-1, 1)
 
 # OK, render that.
-wg = WaveGraph(series_set, style, scale, True)
+wg = WaveGraph(series_set, scale, style, True)
 lb = Label("Test Graph", style)
 
 output.add_item(lb, x=10, y=5, width=490, height=20)

@@ -1,11 +1,12 @@
 
+from graphication import default_css
 from graphication.text import text_bounds
 from graphication.color import hex_to_rgba
 from graphication.scales import SimpleScale
 
 class WaveGraph(object):
 	
-	def __init__(self, series_set, style, scale, label_curves=False, vertical_axis=False):
+	def __init__(self, series_set, scale, style=None, label_curves=False, vertical_axis=False):
 		
 		"""
 		Constructor; creates a new WaveGraph.

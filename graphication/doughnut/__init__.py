@@ -1,10 +1,11 @@
 
 import math
 from graphication.color import hex_to_rgba
+from graphication import css, default_css
 
 class Doughnut(object):
 	
-	def __init__(self, series_set, style):
+	def __init__(self, series_set, style=None):
 		
 		"""
 		Constructor; creates a new WaveGraph.
@@ -17,7 +18,8 @@ class Doughnut(object):
 		"""
 		
 		self.series_set = series_set
-		self.style = style
+		
+		self.style = default_css.merge(style)
 	
 	
 	def set_size(self, width, height):

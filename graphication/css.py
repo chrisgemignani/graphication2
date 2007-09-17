@@ -452,19 +452,30 @@ class CssStylesheet(object):
 	__getitem__ = props = get_properties_str
 	
 	
-	def update(self, stylesheet):
+	def merge(self, stylesheet=None):
 		
 		"""
-		Updates this stylesheet with rules from the other one, with the other
+		Merges this stylesheet with the other one, with the other
 		stylesheet's rules taking preference.
+		
+		Returns the resulting merged stylesheet.
+		
+		Note: DOES NOT update this stylesheet.
+		
+		If the stylesheet parameter is None, returns a copy of this stylesheet.
 		
 		@param stylesheet: The stylesheet to update from.
 		@type stylesheet: CssStylesheet
 		"""
 		
 		# TODO: A more sophisticated update that removes duplicates.
-		self.rules += stylesheet.rules
-		self.rules.sort(key=lambda r: r.selector.specificity)
+		new_stylesheet = CssStylesheet()
+		if stylesheet is None:
+			new_stylesheet.rules = self.rules + []
+		else:
+			new_stylesheet.rules = self.rules + stylesheet.rules
+		new_stylesheet.rules.sort(key=lambda r: r.selector.specificity)
+		return new_stylesheet
 	
 	
 	def __repr__(self):

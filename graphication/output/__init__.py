@@ -2,6 +2,7 @@
 Output modules
 """
 
+from graphication import default_css
 
 class FileOutput(object):
 	
@@ -11,8 +12,8 @@ class FileOutput(object):
 	
 	types = {}
 	
-	def __init__(self, style, padding=0):
-		self.style = style
+	def __init__(self, style=None, padding=0):
+		self.style = default_css.merge(style)
 		self.items = {}
 		self.padding = padding
 	
@@ -47,7 +48,15 @@ class FileOutput(object):
 		if type not in self.types:
 			raise ValueError("Don't know how to write type '%s'." % type)
 		return self.types[type](self, destination)
-
+	
+	
+	def stream(self, type):
+		import tempfile
+		filename = tempfile.mkstemp()[1]
+		self.write(type, filename)
+		fo = open(filename)
+		os.unlink(filename)
+		return fo
 
 
 import graphication.output.svg
