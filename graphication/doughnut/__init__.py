@@ -44,7 +44,6 @@ class Doughnut(object):
 		
 		# Work out the ratios of each series
 		total = self.series_set.sum()
-		print total
 		
 		current_angle = -(math.pi / 2.0)
 		angle_step = (2*math.pi) / total

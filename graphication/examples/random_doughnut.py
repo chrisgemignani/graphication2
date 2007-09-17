@@ -25,8 +25,7 @@ output = FileOutput(style, 5)
 dn = Doughnut(series_set, style)
 lb = Label("Test Graph", style)
 
-output.add_item(lb, x=10, y=5, width=290, height=20)
-output.add_item(dn, x=0, y=30, width=300, height=300)
+output.add_item(dn, x=0, y=0, width=300, height=300)
 
 # Save the images
 output.write("png", "dn.png")
