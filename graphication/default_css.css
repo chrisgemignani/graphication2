@@ -48,3 +48,8 @@ wavegraph {
 wavegraph curve {
 	smoothness: 0.3;
 }
+
+doughnut {
+	outer-radius: 100%;
+	inner-radius: 50%;
+}
