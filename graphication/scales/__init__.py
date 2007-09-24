@@ -1,12 +1,8 @@
 
 
 class BaseScale(object):
-	pass
-
-
-class SimpleScale(BaseScale):
 	
-	def __init__(self, min, max, step=1, padding=0):
+	def __init__(self, min, max, step=None, padding=None):
 		
 		"""
 		Constructor.
@@ -15,6 +11,13 @@ class SimpleScale(BaseScale):
 		@param max: The maximum value to display on the scale.
 		@param step: The value at multiples of which to draw gridlines.
 		"""
+		
+		if step is None:
+			step = self.__class__.default_step
+		assert step > 0, "You must have a positive, non-zero step."
+		
+		if padding is None:
+			padding = self.__class__.default_padding
 		
 		self.min = min - padding
 		self.max = max + padding
@@ -37,3 +40,9 @@ class SimpleScale(BaseScale):
 	def get_point(self, value):
 		
 		return (value - self.min) / self.range
+
+
+class SimpleScale(BaseScale):
+	
+	default_step = 1
+	default_padding = 0

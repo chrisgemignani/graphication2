@@ -28,7 +28,7 @@ class WaveGraph(object):
 		"""
 		
 		self.series_set = series_set
-		self.style = style
+		self.style = default_css.merge(style)
 		self.scale = scale
 		
 		self.calc_rel_points()
@@ -127,12 +127,13 @@ class WaveGraph(object):
 			
 			x = linepos * self.width
 			
+			fascent, fdescent, fheight, fxadvance, fyadvance = context.font_extents()
 			x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
 			
 			padding = label_style.get_float("padding")
 			align = label_style.get_align("text-align")
 			
-			context.move_to(x - (align * width), plot_height + padding + height / 2.0)
+			context.move_to(x - (align * width), plot_height + padding + fheight / 2.0 - fdescent)
 			context.set_source_rgba(*label_style.get_color("color"))
 			context.show_text(title)
 			

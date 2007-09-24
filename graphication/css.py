@@ -208,6 +208,11 @@ class CssRule(object):
 	Has a selector, and a dictionary of properties.
 	"""
 	
+	d_shortcuts = {
+		"padding": ["-top", "-right", "-bottom", "-left"],
+		"margin": ["-top", "-right", "-bottom", "-left"],
+	}
+	
 	def __init__(self, selector, properties={}):
 		
 		"""
@@ -225,6 +230,21 @@ class CssRule(object):
 		
 		self.selector = selector
 		self.properties = properties
+		
+		self.check_shortcuts()
+	
+	
+	def check_shortcuts(self):
+		# For each 'distance shortcut'...
+		for d_shortcut, items in self.__class__.d_shortcuts.items():
+			# If it exists, apply its values as defaults
+			if d_shortcut in self.properties:
+				values = filter(lambda x:bool(x.strip()), self.properties[d_shortcut].split())
+				for item in items:
+					self.properties[d_shortcut+item] = self.properties.get(
+						d_shortcut+item,
+						values[items.index(item) % len(values)]
+					)
 	
 	
 	def __repr__(self):
@@ -249,12 +269,20 @@ class CssProperties(UserDict):
 		return float(self.get(key, default))
 	
 	
+	def is_auto(self, key, default=True):
+		"""Returns if the given field has the special 'auto' value or not."""
+		try:
+			return self[key].lower() == "auto"
+		except KeyError:
+			return default
+	
+	
 	def get_list(self, key, default=[]):
 		"""Like dict.get, but splits the result as a comma-separated list."""
 		return [x.strip() for x in self.get(key, default).split(",")]
 	
 	
-	def get_align(self, key, default=0.5):
+	def get_fraction(self, key, default=0.5):
 		"""Like dict.get, but always returns a number between 0 and 1.
 		Correctly interprets 'top', 'left', 'middle', 'center', etc., as well
 		as percentages."""
@@ -273,6 +301,13 @@ class CssProperties(UserDict):
 					"centre": 0.5,
 					"bottom": 1.0,
 					"right": 1.0,
+					"zero": 0.0,
+					"half": 0.5,
+					"full": 1.0,
+					"all": 1.0,
+					"quarter": 0.25,
+					"three-quarters": 0.75,
+					"none": 0.0,
 				}[val]
 		
 		# Make sure it's valid
@@ -284,6 +319,7 @@ class CssProperties(UserDict):
 		assert (val >= 0) and (val <= 1), "Alignment key '%s' must have a value between 0 and 1, not %s." % (key, val)
 		
 		return val
+	get_align = get_fraction
 	
 	
 	def get_color(self, key="color", default="#000"):

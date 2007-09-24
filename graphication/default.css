@@ -50,6 +50,24 @@ wavegraph curve {
 }
 
 doughnut {
-	outer-radius: 100%;
-	inner-radius: 50%;
+	radius-outer: 100%;
+	radius-inner: 50%;
+	circle-start: 0%;
+	circle-length: 100%;
+}
+
+legend {
+	line-height: 25;
+}
+
+legend key {
+	width: 15;
+	height: 15;
+	padding: 0 8;
+	border-width: 1;
+	border-color: #555;
+}
+
+legend label {
+	font-size: 12;
 }

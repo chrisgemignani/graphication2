@@ -41,14 +41,14 @@ class Doughnut(object):
 		context.save()
 		
 		graph_style = self.style['doughnut']
-		outer_radius = self.center_x * graph_style.get_align('outer-radius', 1.0)
-		inner_radius = self.center_x * graph_style.get_align('inner-radius', 0.5)
+		outer_radius = self.center_x * graph_style.get_align('radius-outer', 1.0)
+		inner_radius = self.center_x * graph_style.get_align('radius-inner', 0.5)
 		
 		# Work out the ratios of each series
 		total = self.series_set.sum()
 		
-		current_angle = -(math.pi / 2.0)
-		angle_step = (2*math.pi) / total
+		current_angle = -(math.pi / 2.0) + (2*math.pi) * graph_style.get_align('circle-start', 1.0)
+		angle_step = ((2*math.pi) / total) * graph_style.get_align('circle-length', 1.0)
 		
 		for series in self.series_set:
 			new_angle = series.sum() * angle_step + current_angle
