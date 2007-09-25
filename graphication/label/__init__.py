@@ -2,10 +2,11 @@
 import cairo
 from graphication.text import get_text_size
 from graphication.color import hex_to_rgba
+from graphication import default_css
 
 class Label(object):
 	
-	def __init__(self, text, style):
+	def __init__(self, text, style=None):
 		
 		"""
 		Constructor.
@@ -17,7 +18,7 @@ class Label(object):
 		"""
 		
 		self.text = text
-		self.style = style
+		self.style = default_css.merge(style)
 	
 	
 	def set_size(self, width, height):

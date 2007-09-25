@@ -14,4 +14,5 @@ from graphication.output import FileOutput
 from graphication.label import Label
 from graphication.series import Series, SeriesSet, Node, NodeSet, NodeLink
 from graphication.scales import SimpleScale
-from graphication.scales.date import DateScale, AutoDateScale
+from graphication.scales.date import DateScale, AutoDateScale, AutoWeekDateScale
+from graphication.colourer import Colourer

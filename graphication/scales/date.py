@@ -90,3 +90,41 @@ class AutoDateScale(DateScale):
 		
 		assert step > 0, "You must have a positive, non-zero step."
 		self.step = step
+
+
+class AutoWeekDateScale(DateScale):
+	
+	"""
+	A special DateScale that takes in a SeriesSet and a step to
+	display with, rather than minima and maxima, and highlights
+	weeks with minor lines and months with major lines.
+	"""
+	
+	def __init__(self, series_set):
+		self.min, self.max = map(d_to_timestamp, series_set.key_range())
+		self.range = float(self.max - self.min)
+	
+	
+	def get_lines(self):
+		
+		"""Yields (linepos, title, ismajor) tuples."""
+		
+		start_week, start_year = map(int, datetime.datetime.fromtimestamp(self.min).strftime("%U %Y").split())
+		start_str = datetime.datetime.fromtimestamp(self.min).strftime("%U %Y")
+		now = datetime.datetime.strptime(start_str, "%U %Y")
+		end = datetime.datetime.fromtimestamp(self.max)
+		
+		old_week, old_month, old_year = now.strftime("%U %B %Y").split()
+		while now < end:
+			now += datetime.timedelta(1)
+			new_week, new_month, new_year = now.strftime("%U %B %Y").split()
+			
+			if new_week != old_week:
+				if new_year != old_year:
+					yield (self.get_point(now), new_month + "\n" + new_year, True)
+				elif new_month != old_month:
+					yield (self.get_point(now), new_month, True)
+				else:
+					yield (self.get_point(now), "", False)
+			
+			old_week, old_month, old_year = now.strftime("%U %B %Y").split()
