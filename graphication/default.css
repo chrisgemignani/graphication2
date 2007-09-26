@@ -22,7 +22,7 @@ grid label {
 	text-align: center;
 }
 
-grid.minor line {
+/*grid.minor line {
 	width: 1;
 	color: #eee;
 }
@@ -34,7 +34,7 @@ grid.minor label {
 grid.major line {
 	width: 2;
 	color: #ddd;
-}
+}*/
 
 point {
 	radius: 6;
@@ -68,6 +68,6 @@ legend key {
 	border-color: #555;
 }
 
-legend label {
+/*legend label {
 	font-size: 12;
-}
+}*/

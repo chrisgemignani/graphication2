@@ -92,6 +92,31 @@ class AutoDateScale(DateScale):
 		self.step = step
 
 
+def week_beginning(date):
+	return date - datetime.timedelta(0 - date.weekday())
+
+
+def week_range(start, end):
+	now = week_beginning(start)
+	while now < end:
+		if now > start:
+			yield now
+		now += datetime.timedelta(7)
+
+
+def month_beginning(date):
+	return date.replace(day=1)
+
+
+def month_range(start, end):
+	now = month_beginning(start)
+	while now < end:
+		if now > start:
+			yield now
+		now += datetime.timedelta(32)
+		now = month_beginning(now)
+
+
 class AutoWeekDateScale(DateScale):
 	
 	"""
@@ -109,22 +134,18 @@ class AutoWeekDateScale(DateScale):
 		
 		"""Yields (linepos, title, ismajor) tuples."""
 		
-		start_week, start_year = map(int, datetime.datetime.fromtimestamp(self.min).strftime("%U %Y").split())
-		start_str = datetime.datetime.fromtimestamp(self.min).strftime("%U %Y")
-		now = datetime.datetime.strptime(start_str, "%U %Y")
+		start = datetime.datetime.fromtimestamp(self.min)
 		end = datetime.datetime.fromtimestamp(self.max)
 		
-		old_week, old_month, old_year = now.strftime("%U %B %Y").split()
-		while now < end:
-			now += datetime.timedelta(1)
-			new_week, new_month, new_year = now.strftime("%U %B %Y").split()
-			
-			if new_week != old_week:
-				if new_year != old_year:
-					yield (self.get_point(now), new_month + "\n" + new_year, True)
-				elif new_month != old_month:
-					yield (self.get_point(now), new_month, True)
-				else:
-					yield (self.get_point(now), "", False)
-			
-			old_week, old_month, old_year = now.strftime("%U %B %Y").split()
+		current_year = None
+		
+		for week in week_range(start, end):
+			yield (self.get_point(week), "", False)
+		
+		for month in month_range(start, end):
+			new_current_year = month.strftime("%Y")
+			if new_current_year != current_year:
+				yield (self.get_point(month), month.strftime("%B %Y"), True)
+			else:
+				yield (self.get_point(month), month.strftime("%B"), True)
+			current_year = new_current_year

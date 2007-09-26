@@ -36,7 +36,7 @@ def get_text_size(text, box_width, box_height, font="Sans", weight=cairo.FONT_WE
 		return box_width/float(ratio)
 
 
-def text_bounds(text, size, font="Sans", style=cairo.FONT_SLANT_NORMAL, weight=cairo.FONT_WEIGHT_NORMAL):
+def text_bounds(text, size, font="Sans", weight=cairo.FONT_WEIGHT_NORMAL, style=cairo.FONT_SLANT_NORMAL):
 	# Create a new surface and context
 	surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 1, 1)
 	context = cairo.Context(surface)

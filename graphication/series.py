@@ -214,6 +214,11 @@ class SeriesSet(object):
 		
 		for key in self.keys():
 			yield key, sum(map(lambda x:x.interpolate(key), self.series))
+	
+	
+	def get_series(self, index):
+		"""Returns the index'th series."""
+		return self.series[index]
 
 
 
