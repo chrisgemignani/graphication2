@@ -305,7 +305,7 @@ class WaveGraph(object):
 			context.set_source_rgba(*line_style.get_color("color"))
 			x = linepos * self.width
 			context.move_to(x, 0)
-			context.line_to(x, self.plot_height)
+			context.line_to(x, self.plot_height*line_style.get_fraction("height", 1.0))
 			context.stroke()
 		
 		

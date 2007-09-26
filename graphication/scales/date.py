@@ -92,29 +92,49 @@ class AutoDateScale(DateScale):
 		self.step = step
 
 
-def week_beginning(date):
-	return date - datetime.timedelta(0 - date.weekday())
+def round_to_weekday(date, weekday=0):
+	"""Returns the given weekday in the week 'date' is in."""
+	return date + datetime.timedelta(weekday - date.weekday())
 
 
-def week_range(start, end):
-	now = week_beginning(start)
+def week_iter(start, end, weekday=0):
+	"""Returns a list of all given weekdays between start and end."""
+	if isinstance(start, datetime.datetime):
+		start = start.date()
+	if isinstance(start, float):
+		start = datetime.date.fromtimestamp(start)
+	if isinstance(end, datetime.datetime):
+		end = end.date()
+	if isinstance(end, float):
+		end = datetime.date.fromtimestamp(end)
+	now = round_to_weekday(start, weekday)
 	while now < end:
 		if now > start:
 			yield now
 		now += datetime.timedelta(7)
 
 
-def month_beginning(date):
-	return date.replace(day=1)
+def round_to_month(date, day=0):
+	"""Returns the given day in the month 'date' is in."""
+	return date + datetime.timedelta(day + 1 - date.day)
 
 
-def month_range(start, end):
-	now = month_beginning(start)
+def month_iter(start, end, weekday=0):
+	"""Returns a list of all given weekdays between start and end."""
+	if isinstance(start, datetime.datetime):
+		start = start.date()
+	if isinstance(start, float):
+		start = datetime.date.fromtimestamp(start)
+	if isinstance(end, datetime.datetime):
+		end = end.date()
+	if isinstance(end, float):
+		end = datetime.date.fromtimestamp(end)
+	now = round_to_month(start)
 	while now < end:
 		if now > start:
 			yield now
 		now += datetime.timedelta(32)
-		now = month_beginning(now)
+		now = round_to_month(now)
 
 
 class AutoWeekDateScale(DateScale):
@@ -125,9 +145,10 @@ class AutoWeekDateScale(DateScale):
 	weeks with minor lines and months with major lines.
 	"""
 	
-	def __init__(self, series_set):
+	def __init__(self, series_set, short_names=False):
 		self.min, self.max = map(d_to_timestamp, series_set.key_range())
 		self.range = float(self.max - self.min)
+		self.short_names = short_names
 	
 	
 	def get_lines(self):

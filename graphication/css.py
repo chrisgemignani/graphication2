@@ -316,7 +316,7 @@ class CssProperties(UserDict):
 		except ValueError:
 			raise ValueError("Invalid value for alignment key '%s': %s" % (key, val))
 		
-		assert (val >= 0) and (val <= 1), "Alignment key '%s' must have a value between 0 and 1, not %s." % (key, val)
+		#assert (val >= 0) and (val <= 1), "Alignment key '%s' must have a value between 0 and 1, not %s." % (key, val)
 		
 		return val
 	get_align = get_fraction
