@@ -126,9 +126,10 @@ class AutoWeekDateScale(DateScale):
 	weeks with minor lines and months with major lines.
 	"""
 	
-	def __init__(self, series_set):
+	def __init__(self, series_set, short_labels=False):
 		self.min, self.max = map(d_to_timestamp, series_set.key_range())
 		self.range = float(self.max - self.min)
+		self.short_labels = short_labels
 	
 	
 	def get_lines(self):
@@ -140,13 +141,18 @@ class AutoWeekDateScale(DateScale):
 		
 		current_year = None
 		
+		if self.short_labels:
+			m_fmt, my_fmt = "%b", "%b %y"
+		else:
+			m_fmt, my_fmt = "%B", "%B %Y"
+		
 		for week in week_range(start, end):
 			yield (self.get_point(week), "", False)
 		
 		for month in month_range(start, end):
 			new_current_year = month.strftime("%Y")
 			if new_current_year != current_year:
-				yield (self.get_point(month), month.strftime("%B %Y"), True)
+				yield (self.get_point(month), month.strftime(my_fmt), True)
 			else:
-				yield (self.get_point(month), month.strftime("%B"), True)
+				yield (self.get_point(month), month.strftime(m_fmt), True)
 			current_year = new_current_year

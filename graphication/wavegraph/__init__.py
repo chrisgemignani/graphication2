@@ -2,11 +2,11 @@
 from graphication import default_css
 from graphication.text import text_bounds
 from graphication.color import hex_to_rgba
-from graphication.scales import SimpleScale
+from graphication.scales import SimpleScale, VerticalWavegraphScale
 
 class WaveGraph(object):
 	
-	def __init__(self, series_set, scale, style=None, label_curves=False, vertical_axis=False):
+	def __init__(self, series_set, scale, style=None, label_curves=True, vertical_scale=False):
 		
 		"""
 		Constructor; creates a new WaveGraph.
@@ -30,6 +30,8 @@ class WaveGraph(object):
 		self.series_set = series_set
 		self.style = default_css.merge(style)
 		self.scale = scale
+		self.label_curves = label_curves
+		self.vertical_scale = vertical_scale
 		
 		self.calc_rel_points()
 	
@@ -44,7 +46,7 @@ class WaveGraph(object):
 		
 		# Work out our extents
 		y_total = max([total for (key, total) in self.series_set.totals()])
-		y_scale = SimpleScale(0, y_total)
+		self.y_scale = VerticalWavegraphScale(0, y_total)
 		
 		# Calculate the points
 		cols = []
@@ -57,7 +59,7 @@ class WaveGraph(object):
 			ys = []
 			total = 0
 			for ser, val in stack:
-				y = y_scale.get_point(val) * y_size
+				y = self.y_scale.get_point(val) * y_size
 				ys.append(total)
 				total += y
 			ys.append(total)
@@ -76,7 +78,8 @@ class WaveGraph(object):
 		self.height = height
 		self.calc_plot_height()
 		self.points = [[(x*self.width, y*self.plot_height) for x, y in zip(self.xs, ys)] for ys in self.rows]
-		self.calc_text_positions()
+		if self.label_curves:
+			self.calc_text_positions()
 	
 	
 	def interpolate(self, points, accuracy):
@@ -268,10 +271,52 @@ class WaveGraph(object):
 		
 		context.save()
 		
-		major_style = self.style['wavegraph grid.major']
-		minor_style = self.style['wavegraph grid.minor']
+		# Draw the vertical scale, if necessary
+		if self.vertical_scale:
+			major_style = self.style['wavegraph grid#y.major']
+			minor_style = self.style['wavegraph grid#y.minor']
+			
+			for linepos, title, ismajor in self.y_scale.get_lines():
+			
+				if ismajor:
+					this_style = major_style
+				else:
+					this_style = minor_style
+				
+				line_style = this_style.sub('line')
+				label_style = this_style.sub('label')
+				
+				context.select_font_face(
+					label_style.get_font(),
+					label_style.get_cairo_font_style(),
+					label_style.get_cairo_font_weight(),
+				)
+				context.set_font_size( label_style.get_float("font-size") )
+				
+				y = linepos * self.plot_height
+				
+				fascent, fdescent, fheight, fxadvance, fyadvance = context.font_extents()
+				x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
+				
+				padding = label_style.get_float("padding")
+				align = label_style.get_align("text-align")
+				
+				context.move_to(0 - padding - (align * width), y + fheight / 2.0 - fdescent)
+				context.set_source_rgba(*label_style.get_color("color"))
+				context.show_text(title)
+				
+				context.set_line_width(line_style.get_float("width", 1))
+				context.set_source_rgba(*line_style.get_color("color", "#aaa"))
+				
+				context.move_to(0 - line_style.get_float("padding", 0), y)
+				context.line_to(self.width, y)
+				context.stroke()
 		
 		# Render the labels and lines
+		
+		major_style = self.style['wavegraph grid#x.major']
+		minor_style = self.style['wavegraph grid#x.minor']
+		
 		for linepos, title, ismajor in self.scale.get_lines():
 			
 			if ismajor:
@@ -300,14 +345,14 @@ class WaveGraph(object):
 			context.move_to(x - (align * width), self.plot_height + padding + fheight / 2.0 - fdescent)
 			context.set_source_rgba(*label_style.get_color("color"))
 			context.show_text(title)
+			#context.text_path(title)
 			
-			context.set_line_width(line_style.get_float("width"))
-			context.set_source_rgba(*line_style.get_color("color"))
-			x = linepos * self.width
+			context.set_line_width(line_style.get_float("width", 1))
+			context.set_source_rgba(*line_style.get_color("color", "#aaa"))
 			context.move_to(x, 0)
-			context.line_to(x, self.plot_height*line_style.get_fraction("height", 1.0))
+			context.line_to(x, self.plot_height + line_style.get_float("padding", 0))
 			context.stroke()
-		
+			
 		
 		# Draw the strips
 		smooth = self.style['wavegraph curve'].get_float("smoothness")
@@ -342,68 +387,45 @@ class WaveGraph(object):
 			context.fill()
 		
 		# Draw the on-curve labels
-		# Initialise context
 		
-		label_style = self.style['wavegraph curve label']
-		
-		dimming_top = label_style.get_float('dimming-top', 1)
-		dimming_bottom = label_style.get_float('dimming-bottom', 0)
-		
-		r,g,b,a = label_style.get_color('color', '#fff')
-		context.select_font_face(
-			label_style.get_font(),
-			label_style.get_cairo_font_style(),
-			label_style.get_cairo_font_weight(),
-		)
-		
-		# Draw the labels
-		for (size, (x1, y1, x2, y2)), title in self.labels:
-			# Set the colour, including dimming
-			if size >= dimming_top:
-				dim = 1
-			elif size < dimming_bottom:
-				dim = 0
-			else:
-				dim = (size-dimming_bottom) / float(dimming_top-dimming_bottom)
-			context.set_source_rgba(r,g,b,a*dim)
+		if self.label_curves:
+			label_style = self.style['wavegraph curve label']
 			
-			# Position outselves
-			context.set_font_size(size * 0.9)
-			x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
-			context.move_to(((x2+x1)/2.0) - width / 2 - x_bearing, ((y2+y1)/2.0) - height / 2 - y_bearing)
+			dimming_top = label_style.get_float('dimming-top', 1)
+			dimming_bottom = label_style.get_float('dimming-bottom', 0)
 			
-			# Draw the text. We use text_path because it looks prettier 
-			# (on image surfaces, show_text coerces font paths to fit inside pixels)
-			context.show_text(title)
-			#context.text_path(title)
+			r,g,b,a = label_style.get_color('color', '#fff')
+			context.select_font_face(
+				label_style.get_font(),
+				label_style.get_cairo_font_style(),
+				label_style.get_cairo_font_weight(),
+			)
 			
-			context.fill()
-		
-		
-		# Do we need labels on the bottom?
-		#if self.x_labels_major:
-			#context.save()
-			#context.translate(0, self.cheight)
-			#self.x_labels_major.render(context,
-				#color=self.style['wavegraph:label_color'],
-				#size=self.style['wavegraph:label_size'],
-				#font=self.style['wavegraph:label_font'],
-			#)
-			#context.restore()
-		
-		## Render the curve labels if needed
-		#if self.curve_labels:
-			#if self.style['wavegraph:debug']:
-				#self.curve_labels.render_debug(context)
-			#self.curve_labels.render(context,
-				#color=self.style['wavegraph:curve_label_color'],
-				#font=self.style['wavegraph:curve_label_font'],
-				#weight=self.style['wavegraph:curve_label_font_weight'],
-				#dimming_top=self.style['wavegraph:dimming_top'],
-				#dimming_bottom=self.style['wavegraph:dimming_bottom'],
-			#)
-		
-		#self.render_debug(context)
+			# Draw the labels
+			for (size, (x1, y1, x2, y2)), title in self.labels:
+				# Set the colour, including dimming
+				if size >= dimming_top:
+					dim = 1
+				elif size < dimming_bottom:
+					dim = 0
+				else:
+					dim = (size-dimming_bottom) / float(dimming_top-dimming_bottom)
+				context.set_source_rgba(r,g,b,a*dim)
+				
+				# Position outselves
+				context.set_font_size(size * 0.9)
+				x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
+				context.move_to(((x2+x1)/2.0) - width / 2 - x_bearing, ((y2+y1)/2.0) - height / 2 - y_bearing)
+				
+				# Draw the text. We use text_path because it looks prettier 
+				# (on image surfaces, show_text coerces font paths to fit inside pixels)
+				context.show_text(title)
+				#context.text_path(title)
+				
+				context.fill()
+			
+			# If uncommented, will show the used text boxes
+			#self.render_debug(context)
 		
 		context.restore()
 

@@ -293,22 +293,25 @@ class CssProperties(UserDict):
 			if val[-1] == "%":
 				val = float(val[:-1]) / 100.0
 			else:
-				val = {
-					"left": 0.0,
-					"top": 0.0,
-					"middle": 0.5,
-					"center": 0.5,
-					"centre": 0.5,
-					"bottom": 1.0,
-					"right": 1.0,
-					"zero": 0.0,
-					"half": 0.5,
-					"full": 1.0,
-					"all": 1.0,
-					"quarter": 0.25,
-					"three-quarters": 0.75,
-					"none": 0.0,
-				}[val]
+				try:
+					val = float(val)
+				except ValueError:
+					val = {
+						"left": 0.0,
+						"top": 0.0,
+						"middle": 0.5,
+						"center": 0.5,
+						"centre": 0.5,
+						"bottom": 1.0,
+						"right": 1.0,
+						"zero": 0.0,
+						"half": 0.5,
+						"full": 1.0,
+						"all": 1.0,
+						"quarter": 0.25,
+						"three-quarters": 0.75,
+						"none": 0.0,
+					}[val]
 		
 		# Make sure it's valid
 		try:

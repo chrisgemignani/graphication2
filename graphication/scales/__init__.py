@@ -14,7 +14,8 @@ class BaseScale(object):
 		
 		if step is None:
 			step = self.__class__.default_step
-		assert step > 0, "You must have a positive, non-zero step."
+		if not getattr(self.__class__, 'allow_zero_step', False):
+			assert step > 0, "You must have a positive, non-zero step."
 		
 		if padding is None:
 			padding = self.__class__.default_padding
@@ -31,8 +32,9 @@ class BaseScale(object):
 		"""Yields (linepos, title, ismajor) tuples."""
 		
 		real_min = self.min + self.padding
+		real_max = self.max - self.padding
 		x = real_min - (real_min % self.step)
-		while x <= self.max - self.padding:
+		while x <= real_max:
 			yield self.get_point(x), str(x), True
 			x += self.step
 	
@@ -46,3 +48,26 @@ class SimpleScale(BaseScale):
 	
 	default_step = 1
 	default_padding = 0
+
+
+class VerticalWavegraphScale(BaseScale):
+	
+	default_step = None
+	default_padding = 0
+	allow_zero_step = True
+	
+	def get_lines(self):
+		"""Yields (linepos, title, ismajor) tuples."""
+		
+		if not self.step:
+			import math
+			self.step = (10 ** (math.ceil(math.log10(self.range)) - 1))
+			if self.range / self.step < 4:
+				self.step /= 2
+		
+		real_min = self.min + self.padding
+		real_max = self.max - self.padding
+		x = real_max - (real_max % self.step)
+		while x >= real_min :
+			yield self.get_point(real_max - x), "%.0f" % x, True
+			x -= self.step
