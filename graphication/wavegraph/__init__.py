@@ -248,8 +248,7 @@ class WaveGraph(object):
 			)
 			padding = label_style.get_float("padding")
 			
-			max_height = max(max_height, height + padding*2)
-		
+			max_height = max(max_height, height + padding)
 		self.plot_height = self.height - max_height
 	
 	
