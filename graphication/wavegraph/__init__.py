@@ -6,7 +6,7 @@ from graphication.scales import SimpleScale, VerticalWavegraphScale
 
 class WaveGraph(object):
 	
-	def __init__(self, series_set, scale, style=None, label_curves=True, vertical_scale=False):
+	def __init__(self, series_set, scale, style=None, label_curves=True, vertical_scale=False, debug=False):
 		
 		"""
 		Constructor; creates a new WaveGraph.
@@ -30,6 +30,7 @@ class WaveGraph(object):
 		self.series_set = series_set
 		self.style = default_css.merge(style)
 		self.scale = scale
+		self.debug = debug
 		self.label_curves = label_curves
 		self.vertical_scale = vertical_scale
 		
@@ -174,18 +175,22 @@ class WaveGraph(object):
 			
 			# Work out bounding boxes for these points
 			boxes = []
-			for i in range(len(tops)-1):
-				tl = tops[i]
-				tr = tops[i+1]
-				bl = bottoms[i]
-				br = bottoms[i+1]
+			for j in range(len(tops)):
+				tl = tops[j]
+				#tr = tops[j+1]
+				bl = bottoms[j]
+				#br = bottoms[j+1]
 				
-				boxes.append((tl[0], max(tl[1], tr[1]), br[0], min(bl[1], br[1])))
+				#boxes.append((tl[0], max(tl[1], tr[1]), br[0], min(bl[1], br[1])))
+				boxes.append((tl[0], tl[1], bl[0], bl[1]))
 			
 			# Go through and union them to collect a set of bigger boxes
 			bigboxes = [boxes]
-			for i in range(accuracy*2):
+			for j in range(accuracy*2):
 				bigboxes.append(map(self.rect_union, off_zip(bigboxes[-1])))
+			
+			if i == 1 and self.debug:
+				self.labels.extend([((0, b), "") for b in bigboxes[1]])
 			
 			# Reduce that into a single list, rather than a list of lists
 			bigboxes = reduce(lambda a, b: a+b, bigboxes)
@@ -257,9 +262,14 @@ class WaveGraph(object):
 		"""Renders the calculation rectangles"""
 		
 		context.save()
-		context.set_source_rgba(*hex_to_rgba("#f006"))
 		
 		for (size, (x1, y1, x2, y2)), title in self.labels:
+			if size:
+				context.set_source_rgba(*hex_to_rgba("#f006"))
+				context.set_line_width(1)
+			else:
+				context.set_source_rgba(*hex_to_rgba("#0f06"))
+				context.set_line_width(0.5)
 			context.rectangle(x1, y1, (x2-x1), (y2-y1))
 			context.stroke()
 		
@@ -267,6 +277,8 @@ class WaveGraph(object):
 	
 	
 	def render(self, context, debug=False):
+		
+		debug = debug or self.debug
 		
 		context.save()
 		
@@ -386,7 +398,6 @@ class WaveGraph(object):
 			context.fill()
 		
 		# Draw the on-curve labels
-		
 		if self.label_curves:
 			label_style = self.style['wavegraph curve label']
 			
@@ -402,29 +413,56 @@ class WaveGraph(object):
 			
 			# Draw the labels
 			for (size, (x1, y1, x2, y2)), title in self.labels:
-				# Set the colour, including dimming
-				if size >= dimming_top:
-					dim = 1
-				elif size < dimming_bottom:
-					dim = 0
-				else:
-					dim = (size-dimming_bottom) / float(dimming_top-dimming_bottom)
-				context.set_source_rgba(r,g,b,a*dim)
-				
-				# Position outselves
-				context.set_font_size(size * 0.9)
-				x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
-				context.move_to(((x2+x1)/2.0) - width / 2 - x_bearing, ((y2+y1)/2.0) - height / 2 - y_bearing)
-				
-				# Draw the text. We use text_path because it looks prettier 
-				# (on image surfaces, show_text coerces font paths to fit inside pixels)
-				context.show_text(title)
-				#context.text_path(title)
-				
-				context.fill()
+				if size > 0:
+					# Set the colour, including dimming
+					if size >= dimming_top:
+						dim = 1
+					elif size < dimming_bottom:
+						dim = 0
+					else:
+						dim = (size-dimming_bottom) / float(dimming_top-dimming_bottom)
+					context.set_source_rgba(r,g,b,a*dim)
+					
+					# Position outselves
+					context.set_font_size(size * 0.9)
+					x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
+					context.move_to(((x2+x1)/2.0) - width / 2 - x_bearing, ((y2+y1)/2.0) - height / 2 - y_bearing)
+					
+					# Draw the text. We use text_path because it looks prettier 
+					# (on image surfaces, show_text coerces font paths to fit inside pixels)
+					context.show_text(title)
+					#context.text_path(title)
+					
+					context.fill()
 			
 			# If uncommented, will show the used text boxes
 			#self.render_debug(context)
+		
+		# Do we need labels on the bottom?
+		#if self.x_labels_major:
+			#context.save()
+			#context.translate(0, self.cheight)
+			#self.x_labels_major.render(context,
+				#color=self.style['wavegraph:label_color'],
+				#size=self.style['wavegraph:label_size'],
+				#font=self.style['wavegraph:label_font'],
+			#)
+			#context.restore()
+		
+		## Render the curve labels if needed
+		#if self.curve_labels:
+			#if self.style['wavegraph:debug']:
+				#self.curve_labels.render_debug(context)
+			#self.curve_labels.render(context,
+				#color=self.style['wavegraph:curve_label_color'],
+				#font=self.style['wavegraph:curve_label_font'],
+				#weight=self.style['wavegraph:curve_label_font_weight'],
+				#dimming_top=self.style['wavegraph:dimming_top'],
+				#dimming_bottom=self.style['wavegraph:dimming_bottom'],
+			#)
+		
+		if debug:
+			self.render_debug(context)
 		
 		context.restore()
 

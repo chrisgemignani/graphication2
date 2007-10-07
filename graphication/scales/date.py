@@ -97,7 +97,7 @@ def week_beginning(date):
 
 
 def week_range(start, end):
-	now = week_beginning(start)
+	now = week_beginning(start) + datetime.timedelta(1)
 	while now < end:
 		if now > start:
 			yield now

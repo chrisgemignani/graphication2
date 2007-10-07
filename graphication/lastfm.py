@@ -17,6 +17,8 @@ cachedir = "/var/tmp/lastfm/"
 
 # The lockfile to use to stop too many requests.
 lockfile = os.path.join(cachedir, "netlock")
+if not os.path.exists(lockfile):
+	open(lockfile, "w")
 
 # The Last.fm API url
 lastfm_api_url = "http://ws.audioscrobbler.com/1.0/%s"
