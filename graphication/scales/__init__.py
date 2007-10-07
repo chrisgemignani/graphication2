@@ -65,9 +65,15 @@ class VerticalWavegraphScale(BaseScale):
 			if self.range / self.step < 4:
 				self.step /= 2
 		
+		if self.step < 1:
+			dp = math.ceil(abs(math.log10(self.step)))
+			print dp
+		else:
+			dp = 0
+		
 		real_min = self.min + self.padding
 		real_max = self.max - self.padding
 		x = real_max - (real_max % self.step)
 		while x >= real_min :
-			yield self.get_point(real_max - x), "%.0f" % x, True
+			yield self.get_point(real_max - x), ("%%.%if" % dp) % x, True
 			x -= self.step
