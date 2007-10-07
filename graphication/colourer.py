@@ -44,7 +44,7 @@ class Colourer(object):
 	series in nicely to be shown in a wavegraph."""
 	
 	
-	def __init__(self, style):
+	def __init__(self, style=None):
 		
 		self.style = default_css.merge(style)
 	
@@ -53,8 +53,8 @@ class Colourer(object):
 		
 		style = self.style['colourer']
 		
-		start_rgb = style.get_color('gradient-start', (50, 70, 140))[:3]
-		end_rgb = style.get_color('gradient-end', (50, 140, 70))[:3]
+		start_rgb = style.get_color('gradient-start', "#334489")[:3]
+		end_rgb = style.get_color('gradient-end', "#2d8f3c")[:3]
 		
 		start_hsv = rgb_to_hsv(*start_rgb)
 		end_hsv = rgb_to_hsv(*end_rgb)

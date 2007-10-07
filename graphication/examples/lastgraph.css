@@ -1,0 +1,31 @@
+* {
+	font-family: NeoSansLight;
+}
+
+colourer {
+	gradient-start: #334489;
+	gradient-end: #2d8f3c;
+}
+
+grid.major line {
+	color: #666;
+	width: 2;
+}
+
+grid.minor line {
+	color: #ddd;
+	width: 1;
+}
+
+grid.major label {
+	padding: 17;
+}
+
+wavegraph {
+	dimming-top: 4;
+	dimming-bottom: 0.5;
+}
+
+wavegraph curve {
+	color: #fff;
+}

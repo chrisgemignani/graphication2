@@ -4,7 +4,7 @@ import sys
 import time
 import random
 import graphication.lastfm as lastfm
-from graphication import FileOutput, Series, SeriesSet, Label, SimpleScale, css
+from graphication import *
 from graphication.wavegraph import WaveGraph
 
 # Grab the last year's worth for the given username
@@ -22,21 +22,25 @@ for artist, plays in artists:
 	))
 
 # Initialise our style
-css.install_hook()
-import graphication.examples.lastfm_css as style
+import graphication.examples.lastgraph_css as style
+
+# Colour that set!
+cr = Colourer(style)
+cr.colour(series_set)
 
 # Create the output
 output = FileOutput(style)
 
-# We'll have major lines every integer, and minor ones every half
-scale = SimpleScale(time.time() - 31557600, time.time(), 86400*7)
+# Weeky scale
+scale = AutoWeekDateScale(series_set)
 
 # OK, render that.
-wg = WaveGraph(series_set, scale, style, True)
+wg = WaveGraph(series_set, scale, style, label_curves=True)
 lb = Label(username, style)
 
-output.add_item(lb, x=10, y=5, width=490, height=20)
-output.add_item(wg, x=0, y=30, width=30*len(series_set.keys()), height=200)
+width = 30*len(series_set.keys())
+output.add_item(lb, x=10, y=5, width=width-20, height=20)
+output.add_item(wg, x=0, y=30, width=width, height=200)
 
 # Save the images
 output.write("pdf", "%s.pdf" % username)
