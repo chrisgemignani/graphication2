@@ -12,8 +12,7 @@ def write(self, filename):
 	
 	# Create an image context
 	import cairo
-	width, height = self.calculate_size()
-	surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+	surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.width, self.height)
 	
 	# Make sure it renders fonts using gray-based antialiasing
 	font_options = surface.get_font_options()

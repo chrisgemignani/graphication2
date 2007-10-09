@@ -12,8 +12,7 @@ def write(self, filename):
 	
 	# Create the SVG context
 	import cairo
-	width, height = self.calculate_size()
-	surface = cairo.SVGSurface(filename, width, height)
+	surface = cairo.SVGSurface(filename, self.width, self.height)
 	context = cairo.Context(surface)
 	
 	# Do the rendering

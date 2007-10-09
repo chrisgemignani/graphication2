@@ -46,6 +46,8 @@ class FileOutput(object):
 			context.restore()
 	
 	def write(self, type, destination):
+		if not hasattr(self, "width"):
+			self.width, self.height = self.calculate_size()
 		if type not in self.types:
 			raise ValueError("Don't know how to write type '%s'." % type)
 		return self.types[type](self, destination)
