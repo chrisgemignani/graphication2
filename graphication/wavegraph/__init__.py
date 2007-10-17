@@ -6,7 +6,7 @@ from graphication.scales import SimpleScale, VerticalWavegraphScale
 
 class WaveGraph(object):
 	
-	def __init__(self, series_set, scale, style=None, label_curves=True, vertical_scale=False, debug=False):
+	def __init__(self, series_set, scale, style=None, label_curves=True, vertical_scale=False, debug=False, textfix=False):
 		
 		"""
 		Constructor; creates a new WaveGraph.
@@ -33,6 +33,7 @@ class WaveGraph(object):
 		self.debug = debug
 		self.label_curves = label_curves
 		self.vertical_scale = vertical_scale
+		self.textfix = textfix
 		
 		self.calc_rel_points()
 	
@@ -355,8 +356,10 @@ class WaveGraph(object):
 			
 			context.move_to(x - (align * width), self.plot_height + padding + fheight / 2.0 - fdescent)
 			context.set_source_rgba(*label_style.get_color("color"))
-			context.show_text(title)
-			#context.text_path(title)
+			if self.textfix:
+				context.text_path(title)
+			else:
+				context.show_text(title)
 			
 			context.set_line_width(line_style.get_float("width", 1))
 			context.set_source_rgba(*line_style.get_color("color", "#aaa"))
@@ -428,10 +431,12 @@ class WaveGraph(object):
 					x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
 					context.move_to(((x2+x1)/2.0) - width / 2 - x_bearing, ((y2+y1)/2.0) - height / 2 - y_bearing)
 					
-					# Draw the text. We use text_path because it looks prettier 
+					# Draw the text. We might use text_path because it looks prettier 
 					# (on image surfaces, show_text coerces font paths to fit inside pixels)
-					context.show_text(title)
-					#context.text_path(title)
+					if self.textfix:
+						context.text_path(title)
+					else:
+						context.show_text(title)
 					
 					context.fill()
 			
