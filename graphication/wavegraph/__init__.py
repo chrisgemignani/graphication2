@@ -360,6 +360,7 @@ class WaveGraph(object):
 				context.text_path(title)
 			else:
 				context.show_text(title)
+			context.fill()
 			
 			context.set_line_width(line_style.get_float("width", 1))
 			context.set_source_rgba(*line_style.get_color("color", "#aaa"))
