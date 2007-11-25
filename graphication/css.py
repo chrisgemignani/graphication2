@@ -156,7 +156,7 @@ class CssSelector(object):
 		@type string: str
 		"""
 		
-		details = selector_split(string, True)
+		details = selector_split(string, False)
 		return self(details)
 	
 	
@@ -192,7 +192,7 @@ class CssSelector(object):
 			curr_det = self.details[di]
 			if curr_det[0] in [element, None]:
 				if curr_det[1] in [id, None]:
-					if curr_det[2] in clss + [None]:
+					if filter(lambda x:x in clss+[None],curr_det[2]):
 						di += 1
 						if di >= len(self.details):
 							return True
