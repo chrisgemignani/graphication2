@@ -9,7 +9,7 @@ All properties inherit by default, and there's no support for the 'inherit' keyw
 Any @media, @import, etc. parts are also entirely useless. As is !important.
 
 Copyright Andrew Godwin, 2007
-Released under the terms of the GPL, version 3.
+Released under the terms of the GPL, version 2.
 
 $Id$
 """
