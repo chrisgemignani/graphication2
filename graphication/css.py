@@ -9,7 +9,7 @@ All properties inherit by default, and there's no support for the 'inherit' keyw
 Any @media, @import, etc. parts are also entirely useless. As is !important.
 
 Copyright Andrew Godwin, 2007
-Released under the terms of the GPL, version 2.
+Released under the terms of the GPL, version 3.
 
 $Id$
 """
@@ -156,7 +156,7 @@ class CssSelector(object):
 		@type string: str
 		"""
 		
-		details = selector_split(string, False)
+		details = selector_split(string, True)
 		return self(details)
 	
 	
@@ -192,7 +192,7 @@ class CssSelector(object):
 			curr_det = self.details[di]
 			if curr_det[0] in [element, None]:
 				if curr_det[1] in [id, None]:
-					if filter(lambda x:x in clss+[None],curr_det[2]):
+					if curr_det[2] in clss + [None]:
 						di += 1
 						if di >= len(self.details):
 							return True
