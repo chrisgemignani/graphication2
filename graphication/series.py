@@ -124,6 +124,7 @@ class Series(object):
 		# Interpolate
 		range = post - pre
 		pc = (key - pre)
+		
 		import datetime
 		if isinstance(range, datetime.timedelta):
 			pc = pc.days

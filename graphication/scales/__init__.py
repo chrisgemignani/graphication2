@@ -62,6 +62,9 @@ class VerticalWavegraphScale(BaseScale):
 	def get_lines(self):
 		"""Yields (linepos, title, ismajor) tuples."""
 		
+		# Stop silly singularity errors occurring
+		if self.range = 0: return
+		
 		if not self.step:
 			import math
 			self.step = (10 ** (math.ceil(math.log10(self.range)) - 1))
