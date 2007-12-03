@@ -123,7 +123,12 @@ class Series(object):
 		
 		# Interpolate
 		range = post - pre
-		pc = (key - pre) / float(range)
+		pc = (key - pre)
+		import datetime
+		if isinstance(range, datetime.timedelta):
+			pc = pc.days
+			range = range.days
+		pc = pc / float(range)
 		
 		bottom = self.data[pre]
 		top = self.data[post]
