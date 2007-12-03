@@ -41,7 +41,10 @@ class BaseScale(object):
 	
 	def get_point(self, value):
 		
-		return (value - self.min) / self.range
+		try:
+			return (value - self.min) / self.range
+		except ZeroDivisionError:
+			return 0
 
 
 class SimpleScale(BaseScale):
