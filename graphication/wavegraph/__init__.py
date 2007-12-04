@@ -403,10 +403,10 @@ class WaveGraph(object):
 					for i in range(0, self.width, 5):
 						dt = 1.5 / float(self.width)
 						mid = i / float(self.width)
-						linear.add_color_stop_rgba(mid-dt,  r,g,b,0.5)
-						linear.add_color_stop_rgba(mid-(dt-0.001), r,g,b,a)
-						linear.add_color_stop_rgba(mid+(dt-0.001), r,g,b,a)
-						linear.add_color_stop_rgba(mid+dt, r,g,b,0.5)
+						linear.add_color_stop_rgba(mid-dt,  r,g,b,a*0.34)
+						linear.add_color_stop_rgba(mid-(dt-0.001), r,g,b,a*0.8)
+						linear.add_color_stop_rgba(mid+(dt-0.001), r,g,b,a*0.8)
+						linear.add_color_stop_rgba(mid+dt, r,g,b,a*0.34)
 					context.set_source(linear)
 				
 				elif prev_style == Series.STYLE_LIGHT:
@@ -431,7 +431,6 @@ class WaveGraph(object):
 				
 				# If we have a new draw style, we need to end this segment and begin another
 				if prev_style and draw_style != prev_style:
-					print "changing from %s to %s at %s" % (prev_style, draw_style, j)
 					close_path()
 					prev_style = draw_style
 					context.move_to(*tops[j])
