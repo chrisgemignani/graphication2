@@ -1,5 +1,5 @@
 
-from graphication import default_css
+from graphication import default_css, Series
 from graphication.text import text_bounds
 from graphication.color import hex_to_rgba
 from graphication.scales import SimpleScale, VerticalWavegraphScale
@@ -380,26 +380,65 @@ class WaveGraph(object):
 			tops = self.points[i]
 			bottoms = self.points[i+1]
 			
-			# Draw the tops
+			prev_style = series.style_at(0)
 			context.move_to(*tops[0])
+			
+			bottom_stack = [bottoms[0]]
+			
+			def close_path():
+				ppoint = bottom_stack.pop()
+				context.line_to(*ppoint)
+				while bottom_stack:
+					npoint = bottom_stack.pop()
+					context.curve_to(ppoint[0]-dx, ppoint[1], npoint[0]+dx, npoint[1], npoint[0], npoint[1])
+					ppoint = npoint
+				context.close_path()
+				
+				if prev_style == Series.STYLE_DASHED:
+					
+					r,g,b,a = series.color_as_rgba()
+					
+					import cairo
+					linear = cairo.LinearGradient(0, 0, self.width, self.height)
+					for i in range(0, self.width, 5):
+						dt = 1.5 / float(self.width)
+						mid = i / float(self.width)
+						linear.add_color_stop_rgba(mid-dt,  r,g,b,0.5)
+						linear.add_color_stop_rgba(mid-(dt-0.001), r,g,b,a)
+						linear.add_color_stop_rgba(mid+(dt-0.001), r,g,b,a)
+						linear.add_color_stop_rgba(mid+dt, r,g,b,0.5)
+					context.set_source(linear)
+				
+				elif prev_style == Series.STYLE_LIGHT:
+					r,g,b,a = series.color_as_rgba()
+					context.set_source_rgba(r,g,b,a*0.5)
+				
+				else:
+					context.set_source_rgba(*series.color_as_rgba())
+				
+				context.fill()
+			
+			# Draw the tops
 			for j in range(1, len(tops)):
+				# Get the drawstyle for this coord
+				draw_style = series.style_at(self.scale.get_value(self.xs[j]))
+				
 				ox, oy = tops[j-1]
 				nx, ny = tops[j]
 				dx = (nx - ox) * smooth
 				context.curve_to(ox+dx, oy, nx-dx, ny, nx, ny)
+				bottom_stack.append(bottoms[j])
+				
+				# If we have a new draw style, we need to end this segment and begin another
+				if prev_style and draw_style != prev_style:
+					print "changing from %s to %s at %s" % (prev_style, draw_style, j)
+					close_path()
+					prev_style = draw_style
+					context.move_to(*tops[j])
+					bottom_stack.append(bottoms[j])
 			
-			# And the bottoms
-			context.line_to(*bottoms[-1])
-			for j in range(2, len(bottoms)+1):
-				ox, oy = bottoms[-(j-1)]
-				nx, ny = bottoms[-j]
-				dx = (nx - ox) * smooth
-				context.curve_to(ox+dx, oy, nx-dx, ny, nx, ny)
-			
-			# Close and fill
-			context.set_source_rgba(*series.color_as_rgba())
-			context.close_path()
-			context.fill()
+			# Now close the line overall
+			close_path()
 		
 		# Draw the on-curve labels
 		if self.label_curves:

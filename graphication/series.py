@@ -38,10 +38,15 @@ class Series(object):
 	
 	"""Holds one set of data, with keys, values and a title."""
 	
-	def __init__(self, title, data, color="#000000ff"):
+	STYLE_NONE = 0
+	STYLE_DASHED = 1
+	STYLE_LIGHT = 2
+	
+	def __init__(self, title, data, color="#000000ff", styles={}):
 		self.title = title
 		self.data = data
 		self.color = color.replace("#", "")
+		self.styles = styles
 	
 	
 	def color_as_rgba(self):
@@ -135,6 +140,36 @@ class Series(object):
 		top = self.data[post]
 		vrange = top - bottom
 		return top + (vrange * pc)
+	
+	
+	def __getslice__(self, start, end):
+		newdata = {}
+		for key, value in self.data:
+			if key >= start and key <= end:
+				newdata[key] = value
+		return Series(self.title, newdata, self.color, self.styles)
+	
+	
+	def split_at(self, positions):
+		"""Splits this series into several series at the given
+		positions."""
+		
+		start = 0
+		seriess = []
+		for position in positions:
+			seriess.append(self[start:position])
+			start = position
+		seriess.append(self[start:])
+	
+	
+	def style_at(self, key):
+		"""Returns the style at the given key."""
+		matches = [x for x in self.styles.keys() if x <= key]
+		matches.sort()
+		if matches:
+			return self.styles[matches[-1]]
+		else:
+			return 0
 
 
 

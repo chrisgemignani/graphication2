@@ -13,7 +13,8 @@ for i in range(6):
 	series_set.add_series(Series(
 		"Series%s" % i,
 		randomvalues(num_points),
-		"#3366%2xff" % (50*i)
+		"#3366%2xff" % (50*i),
+		{0:i%3,5:0},
 	))
 
 # Create the output
@@ -23,8 +24,8 @@ output = FileOutput()
 scale = SimpleScale(0, num_points-1, 1)
 
 # OK, render that.
-wg = WaveGraph(series_set, scale, style, True)
-lb = Label("Test Graph", style)
+wg = WaveGraph(series_set, scale, None, False)
+lb = Label("Test Graph", None)
 
 output.add_item(lb, x=10, y=5, width=490, height=20)
 output.add_item(wg, x=0, y=30, width=500, height=200)

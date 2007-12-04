@@ -45,6 +45,11 @@ class BaseScale(object):
 			return (value - self.min) / self.range
 		except ZeroDivisionError:
 			return 0
+	
+	
+	def get_value(self, point):
+		
+		return (point * self.range) + self.min
 
 
 class SimpleScale(BaseScale):
@@ -63,7 +68,7 @@ class VerticalWavegraphScale(BaseScale):
 		"""Yields (linepos, title, ismajor) tuples."""
 		
 		# Stop silly singularity errors occurring
-		if self.range = 0: return
+		if self.range == 0: return
 		
 		if not self.step:
 			import math
