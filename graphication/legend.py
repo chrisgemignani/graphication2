@@ -91,7 +91,6 @@ class Legend(object):
 			for i in range(0, int(key_width), 3):
 				dt = 1.0 / float(key_width)
 				mid = i / float(key_width)
-				print dt
 				linear.add_color_stop_rgba(mid-dt,  r,g,b,a*0.34)
 				linear.add_color_stop_rgba(mid-(dt-0.001), r,g,b,a*0.8)
 				linear.add_color_stop_rgba(mid+(dt-0.001), r,g,b,a*0.8)

@@ -35,7 +35,6 @@ class LineGraph(object):
 		"""Calculates the relative shapes of the sections"""
 		
 		# Get the style stuff
-		y_size = self.style['linegraph'].get_align("height", 0.9)
 		
 		# Work out our extents
 		y_min, y_max = self.series_set.value_range()
@@ -168,17 +167,48 @@ class LineGraph(object):
 		
 		# Draw the lines
 		smooth = self.style['linegraph line'].get_float("smoothness", 0.5)
+		y_size = self.style['linegraph'].get_align("height", 0.9)
 		
 		for series in self.series_set:
 			
 			# Get the line's points
-			points = [(self.scale.get_point(x)*self.width, self.y_scale.get_point(y)*self.plot_height) for x, y in series.items()]
-			xs = [x for x,y in series.items()]
+			points = [(self.scale.get_point(x)*self.width, (1-(self.y_scale.get_point(y)*y_size))*self.plot_height) for x, y in series.items()]
+			xs = [self.scale.get_value(self.scale.get_point(x)) for x,y in series.items()]
 			
 			# Get style infos
 			line_style = self.style['linegraph line']
 			context.set_line_width(line_style.get_float("width", 2))
 			context.set_source_rgba(*series.color_as_rgba())
+			
+			# Finish off a line stylishly
+			def stroke():
+				if prev_style == Series.STYLE_DASHED:
+					
+					r,g,b,a = series.color_as_rgba()
+					
+					import cairo
+					linear = cairo.LinearGradient(0, 0, self.width, self.height)
+					for i in range(0, self.width, 5):
+						dt = 1.5 / float(self.width)
+						mid = i / float(self.width)
+						linear.add_color_stop_rgba(mid-dt,  r,g,b,a*0.34)
+						linear.add_color_stop_rgba(mid-(dt-0.001), r,g,b,a*0.8)
+						linear.add_color_stop_rgba(mid+(dt-0.001), r,g,b,a*0.8)
+						linear.add_color_stop_rgba(mid+dt, r,g,b,a*0.34)
+					context.set_source(linear)
+				
+				elif prev_style == Series.STYLE_LIGHT:
+					r,g,b,a = series.color_as_rgba()
+					context.set_source_rgba(r,g,b,a*0.5)
+				
+				elif prev_style == Series.STYLE_VLIGHT:
+					r,g,b,a = series.color_as_rgba()
+					context.set_source_rgba(r,g,b,a*0.4)
+				
+				else:
+					context.set_source_rgba(*series.color_as_rgba())
+				
+				context.stroke()
 			
 			# Draw the line
 			prev_style = series.style_at(0)
@@ -190,19 +220,17 @@ class LineGraph(object):
 				ox, oy = points[j-1]
 				nx, ny = points[j]
 				
-				print series, xs[j], nx, ny
-				
 				dx = (nx - ox) * smooth
 				context.curve_to(ox+dx, oy, nx-dx, ny, nx, ny)
 				
 				# If we have a new draw style, we need to end this segment and begin another
 				if prev_style and draw_style != prev_style:
-					context.stroke()
+					stroke()
 					prev_style = draw_style
 					context.move_to(*points[j])
 			
 			# Now close the line overall
-			context.stroke()
+			stroke()
 		
 		context.restore()
 

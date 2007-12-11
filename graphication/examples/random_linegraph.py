@@ -17,10 +17,6 @@ for i in range(2):
 		{0:i%3,5:0},
 	))
 
-for series in series_set:
-	print series.value_range(), series.values()
-print series_set.value_range()
-
 # Create the output
 output = FileOutput()
 

@@ -413,6 +413,10 @@ class WaveGraph(object):
 					r,g,b,a = series.color_as_rgba()
 					context.set_source_rgba(r,g,b,a*0.5)
 				
+				elif prev_style == Series.STYLE_VLIGHT:
+					r,g,b,a = series.color_as_rgba()
+					context.set_source_rgba(r,g,b,a*0.4)
+				
 				else:
 					context.set_source_rgba(*series.color_as_rgba())
 				
