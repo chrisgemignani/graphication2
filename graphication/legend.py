@@ -73,7 +73,7 @@ class Legend(object):
 			
 			x_bearing, y_bearing, width, height = context.text_extents(series.title)[:4]
 			
-			context.move_to(label_left - x_bearing, y - height / 2 - y_bearing)
+			context.move_to(label_left - x_bearing, y + key_height/3.6)
 			context.set_source_rgba(*label_style.get_color("color"))
 			context.show_text(series.title)
 			
