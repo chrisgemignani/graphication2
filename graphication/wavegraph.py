@@ -386,6 +386,12 @@ class WaveGraph(object):
 			bottom_stack = [bottoms[0]]
 			
 			def close_path():
+				
+				if prev_style == Series.STYLE_LINETOP:
+					context.set_source_rgba(*series.color_as_rgba())
+					context.set_line_width(2)
+					context.stroke_preserve()
+				
 				ppoint = bottom_stack.pop()
 				context.line_to(*ppoint)
 				while bottom_stack:
@@ -416,6 +422,11 @@ class WaveGraph(object):
 				elif prev_style == Series.STYLE_VLIGHT:
 					r,g,b,a = series.color_as_rgba()
 					context.set_source_rgba(r,g,b,a*0.4)
+				
+				elif prev_style == Series.STYLE_LINETOP:
+					
+					r,g,b,a = series.color_as_rgba()
+					context.set_source_rgba(r,g,b,a*0.2)
 				
 				else:
 					context.set_source_rgba(*series.color_as_rgba())

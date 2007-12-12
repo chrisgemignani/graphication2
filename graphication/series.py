@@ -42,6 +42,7 @@ class Series(object):
 	STYLE_DASHED = 1
 	STYLE_LIGHT = 2
 	STYLE_VLIGHT = 3
+	STYLE_LINETOP = 4
 	
 	def __init__(self, title, data, color="#000000ff", styles={}):
 		self.title = title

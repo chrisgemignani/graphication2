@@ -14,7 +14,7 @@ for i in range(6):
 		"Series%s" % i,
 		randomvalues(num_points),
 		"#3366%2xff" % (50*i),
-		{0:i%3,5:0},
+		{0:(i-1)%5,5:0},
 	))
 
 # Create the output
