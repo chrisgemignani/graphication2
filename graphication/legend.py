@@ -56,12 +56,23 @@ class Legend(object):
 		
 		for series in self.series_set:
 			# Draw the key rectangle
-			context.rectangle(key_left, y - key_height/2.0, key_width, key_height)
-			context.set_source_rgba(*series.color_as_rgba())
-			context.fill_preserve()
-			context.set_line_width(key_border_width)
-			context.set_source_rgba(*key_border_color)
-			context.stroke()
+			if series.style_at(0) == series.STYLE_LINETOP:
+				context.rectangle(key_left, y - key_height/2.0, key_width, key_height)
+				r,g,b,a = series.color_as_rgba()
+				context.set_source_rgba(r,g,b,a*0.3)
+				context.fill()
+				context.set_source_rgba(r,g,b,a)
+				context.set_line_width(3)
+				context.move_to(key_left, y - key_height/2.0)
+				context.line_to(key_left + key_width, y - key_height/2.0)
+				context.stroke()
+			else:
+				context.rectangle(key_left, y - key_height/2.0, key_width, key_height)
+				context.set_source_rgba(*series.color_as_rgba())
+				context.fill_preserve()
+				context.set_line_width(key_border_width)
+				context.set_source_rgba(*key_border_color)
+				context.stroke()
 			
 			# Draw the label
 			context.select_font_face(
