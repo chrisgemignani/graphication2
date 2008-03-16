@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import random
-from graphication import FileOutput, Series, SeriesSet, Label, SimpleScale, css
+from graphication import FileOutput, Series, SeriesSet, Label, SimpleScale, css, default_css as style
 from graphication.doughnut import Doughnut
 
 colours = ["#844648","#b3c234","#244574"]
