@@ -75,11 +75,15 @@ class Series(object):
 	
 	def key_range(self):
 		keys = self.data.keys()
+		if len(keys) == 0:
+			return None, None
 		return min(keys), max(keys)
 	
 	
 	def value_range(self):
 		values = self.data.values()
+		if len(values) == 0:
+			return None, None
 		return min(values), max(values)
 	
 	
@@ -94,6 +98,9 @@ class Series(object):
 	def __len__(self):
 		return len(self.values)
 	
+	def __str__(self):
+		kr = self.key_range()
+		return "%d values, keys between %s and %s" % (len(self), kr[0], kr[1]) 
 	
 	def interpolate(self, key):
 		"""
@@ -205,6 +212,8 @@ class SeriesSet(object):
 	def key_range(self):
 		assert len(self.series) > 0, "Cannot find the range of an empty set."
 		mins, maxs = zip(*[series.key_range() for series in self.series])
+		mins = [m for m in mins if m]
+		maxs = [m for m in maxs if m]
 		return min(mins), max(maxs)
 	
 	
