@@ -12,7 +12,7 @@ def d_to_timestamp(d):
 
 class DateScale(BaseScale):
 	
-	def __init__(self, min, max, step=None, padding=None):
+	def __init__(self, min, max, step=None, padding=None, minor_step=None):
 		
 		"""
 		Constructor.
@@ -27,6 +27,10 @@ class DateScale(BaseScale):
 			step = 86400 * 7
 		assert step > 0, "You must have a positive, non-zero step."
 		
+		if minor_step is None:
+			minor_step = 86400
+		assert minor_step > 0, "You must have a positive, non-zero minor step."
+		
 		if padding is None:
 			padding = 0
 		
@@ -38,6 +42,7 @@ class DateScale(BaseScale):
 		self.padding = padding
 		self.range = float(self.max - self.min)
 		self.step = step
+		self.minor_step = minor_step
 	
 	
 	def get_lines(self):
@@ -45,7 +50,11 @@ class DateScale(BaseScale):
 		"""Yields (linepos, title, ismajor) tuples."""
 		
 		x = real_min = self.min + self.padding
-		#x = real_min - (real_min % self.step)
+		while x <= self.max - self.padding:
+			yield self.get_point(x), self.niceify_date(x), False
+			x += self.minor_step
+		
+		x = real_min = self.min + self.padding
 		while x <= self.max - self.padding:
 			yield self.get_point(x), self.niceify_date(x), True
 			x += self.step
@@ -79,7 +88,7 @@ class AutoDateScale(DateScale):
 	display with, rather than minima and maxima.
 	"""
 	
-	def __init__(self, series_set, step=None):
+	def __init__(self, series_set, step=None, minor_step=None):
 		self.min, self.max = map(d_to_timestamp, series_set.key_range())
 		self.range = float(self.max - self.min)
 		self.padding = 0
@@ -87,8 +96,13 @@ class AutoDateScale(DateScale):
 		if step is None:
 			step = 86400 * 7
 		
+		if minor_step is None:
+			minor_step = 86400
+		
 		assert step > 0, "You must have a positive, non-zero step."
+		assert minor_step > 0, "You must have a positive, non-zero minor step."
 		self.step = step
+		self.minor_step = minor_step
 
 
 def week_beginning(date):
