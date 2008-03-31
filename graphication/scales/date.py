@@ -51,7 +51,7 @@ class DateScale(BaseScale):
 		
 		x = real_min = self.min + self.padding
 		while x <= self.max - self.padding:
-			yield self.get_point(x), self.niceify_date(x), False
+			yield self.get_point(x), "", False
 			x += self.minor_step
 		
 		x = real_min = self.min + self.padding
