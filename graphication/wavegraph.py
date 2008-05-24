@@ -347,19 +347,20 @@ class WaveGraph(object):
 			
 			x = linepos * self.width
 			
-			fascent, fdescent, fheight, fxadvance, fyadvance = context.font_extents()
-			x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
-			
-			padding = label_style.get_float("padding")
-			align = label_style.get_align("text-align")
-			
-			context.move_to(x - (align * width), self.plot_height + padding + fheight / 2.0 - fdescent)
-			context.set_source_rgba(*label_style.get_color("color"))
-			if self.textfix:
-				context.text_path(title)
-			else:
-				context.show_text(title)
-			context.fill()
+			if title:
+				fascent, fdescent, fheight, fxadvance, fyadvance = context.font_extents()
+				x_bearing, y_bearing, width, height = context.text_extents(title)[:4]
+				
+				padding = label_style.get_float("padding")
+				align = label_style.get_align("text-align")
+				
+				context.move_to(x - (align * width), self.plot_height + padding + fheight / 2.0 - fdescent)
+				context.set_source_rgba(*label_style.get_color("color"))
+				if self.textfix:
+					context.text_path(title)
+				else:
+					context.show_text(title)
+				context.fill()
 			
 			context.set_line_width(line_style.get_float("width", 1))
 			context.set_source_rgba(*line_style.get_color("color", "#aaa"))
