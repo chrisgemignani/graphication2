@@ -4,7 +4,7 @@ from graphication.color import hex_to_rgba
 
 def write(self, filename):
 	"""
-	Saves the graph to a SVG file.
+	Saves the graph to a PNG file.
 	
 	@param filename: The name of the file to save to
 	@type filename: str

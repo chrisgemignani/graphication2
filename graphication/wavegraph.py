@@ -231,8 +231,8 @@ class WaveGraph(object):
 	
 	def calc_plot_height(self):
 		
-		major_style = self.style['wavegraph grid.major']
-		minor_style = self.style['wavegraph grid.minor']
+		major_style = self.style['wavegraph grid#x.major']
+		minor_style = self.style['wavegraph grid#x.minor']
 		
 		# Work out the maxiumum label width
 		max_height = 0
@@ -253,7 +253,6 @@ class WaveGraph(object):
 				label_style.get_cairo_font_weight(),
 			)
 			padding = label_style.get_float("padding")
-			
 			max_height = max(max_height, height + padding)
 		self.plot_height = self.height - max_height
 	
