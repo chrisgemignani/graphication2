@@ -62,7 +62,10 @@ class DateScale(BaseScale):
 	
 	def get_point(self, value):
 		value = d_to_timestamp(value)
-		return (value - self.min) / self.range
+		try:
+			return (value - self.min) / self.range
+		except ZeroDivisionError:
+			return 0
 	
 	
 	def niceify_date(self, date):
