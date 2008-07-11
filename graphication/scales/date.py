@@ -5,10 +5,14 @@ import datetime
 
 
 def d_to_timestamp(d):
-	if isinstance(d, int) or isinstance(d, float):
+	if isinstance(d, (int, float)):
 		return d
 	return time.mktime(d.timetuple())
 
+def timestamp_to_d(t):
+	if isinstance(t, (datetime.datetime, datetime.date)):
+		return t
+	return datetime.datetime.fromtimestamp(t)
 
 class DateScale(BaseScale):
 	
@@ -174,3 +178,34 @@ class AutoWeekDateScale(DateScale):
 				else:
 					yield (self.get_point(month), month.strftime(m_fmt), True)
 				current_year = new_current_year
+
+
+
+class WeekdayDateScale(DateScale):
+	
+	"""
+	A DateScale which only plots points on weekdays, reducing weekends
+	to infinitely small lines.
+	"""
+	
+	def __init__(self, *a, **kw):
+		DateScale.__init__(self, *a, **kw)
+		# Adjust range to rescale
+		self.range *= (5/7.0)
+	
+	def get_point(self, value):
+		# Get values in each type
+		value = d_to_timestamp(value)
+		# Work out the step-per-day
+		try:
+			step = 86400 / self.range
+		except ZeroDivisionError:
+			return 0
+		# Starting at the min, step through the days adding only the weekdays
+		vpos = self.min
+		pos = 0
+		while vpos < value:
+			if timestamp_to_d(vpos).weekday() < 5:
+				pos += step
+			vpos += 86400
+		return pos
