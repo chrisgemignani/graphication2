@@ -148,7 +148,7 @@ class Series(object):
 		bottom = self.data[pre]
 		top = self.data[post]
 		vrange = top - bottom
-		return top + (vrange * pc)
+		return bottom + (vrange * pc)
 	
 	
 	def __getslice__(self, start, end):
