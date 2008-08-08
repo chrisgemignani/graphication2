@@ -96,7 +96,7 @@ class Series(object):
 	
 	
 	def __len__(self):
-		return len(self.values)
+		return len(self.data)
 	
 	def __str__(self):
 		kr = self.key_range()

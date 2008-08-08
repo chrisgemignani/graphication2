@@ -71,3 +71,10 @@ legend key {
 /*legend label {
 	font-size: 12;
 }*/
+
+barchart bar {
+	padding: 1;
+	padding-top: 2;
+	border-width: 1;
+	border-color: #0004;
+}

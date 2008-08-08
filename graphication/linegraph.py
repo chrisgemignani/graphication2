@@ -6,7 +6,7 @@ from graphication.scales import SimpleScale, VerticalWavegraphScale
 
 class LineGraph(object):
 	
-	def __init__(self, series_set, scale, style=None, vertical_scale=True, zero_base=True):
+	def __init__(self, series_set, scale, style=None, vertical_scale=True, zero_base=True, smoothed=True):
 		
 		"""
 		Constructor; creates a new LineGraph.
@@ -19,6 +19,9 @@ class LineGraph(object):
 		
 		@param scale: The Scale to use for the graph.
 		@type scale: graphication.scales.BaseScale
+		
+		@param smoothed: If the graph is smoothed (not straight lines)
+		@type smoothed: bool
 		"""
 		
 		self.series_set = series_set
@@ -26,6 +29,7 @@ class LineGraph(object):
 		self.scale = scale
 		self.zero_base = zero_base
 		self.vertical_scale = vertical_scale
+		self.smoothed = smoothed
 		
 		self.calc_rel_points()
 	
@@ -221,7 +225,10 @@ class LineGraph(object):
 				nx, ny = points[j]
 				
 				dx = (nx - ox) * smooth
-				context.curve_to(ox+dx, oy, nx-dx, ny, nx, ny)
+				if self.smoothed:
+					context.curve_to(ox+dx, oy, nx-dx, ny, nx, ny)
+				else:
+					context.line_to(nx, ny)
 				
 				# If we have a new draw style, we need to end this segment and begin another
 				if prev_style and draw_style != prev_style:
