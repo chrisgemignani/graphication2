@@ -81,27 +81,42 @@ class BarChart(Graph):
 		for key in keys:
 			stack = self.series_set.stack(key)
 			bottom = zero_line
+			inner_left = 0
 			for series, value in stack:
 				height = 0 - self.y_scale.get_point(value) * self.plot_height
-				context.rectangle(
-					left + bar_padding,
-					bottom,
-					per_bar - bar_padding*2,
-					height + bar_padding_top,
-				)
+				if self.stacked:
+					x, y, w, h = (
+						left + bar_padding,
+						bottom,
+						per_bar - bar_padding*2,
+						height + bar_padding_top,
+					)
+				else:
+					x, y, w, h = (
+						left + inner_left + bar_padding,
+						bottom,
+						per_bar / len(stack) - bar_padding*2,
+						height + bar_padding_top,
+					)
+					inner_left += per_bar / len(stack)
+				context.rectangle(x, y, w, h)
 				context.set_source_rgba(*series.color_as_rgba())
 				context.fill()
 				# Draw outer border if needed
 				if border_width:
 					context.rectangle(
-						left + bar_padding + 0.5,
-						bottom - 0.5,
-						per_bar - bar_padding*2 - 1,
-						height + bar_padding_top + 1 ,
+						x + 0.5,
+						y - 0.5,
+						w - 1,
+						h + 1,
 					)
 					context.set_source_rgba(*border_color)
 					context.stroke()
-				bottom += height
+				if self.stacked:
+					bottom += height
+			
+			# TODO: See if we need to draw a label here, too
+			
 			
 			left += per_bar
 		
