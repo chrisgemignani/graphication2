@@ -212,8 +212,8 @@ class SeriesSet(object):
 	def key_range(self):
 		assert len(self.series) > 0, "Cannot find the range of an empty set."
 		mins, maxs = zip(*[series.key_range() for series in self.series])
-		mins = [m for m in mins if m]
-		maxs = [m for m in maxs if m]
+		mins = [m for m in mins if m is not None]
+		maxs = [m for m in maxs if m is not None]
 		return min(mins), max(maxs)
 	
 	
