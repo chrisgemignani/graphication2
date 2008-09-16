@@ -78,7 +78,7 @@ def hex_to_rgba(color):
 	@type color: str, 4-tuple or 4-list
 	"""
 	
-	if not isinstance(color, str) or isinstance(color, unicode):
+	if not (isinstance(color, str) or isinstance(color, unicode)):
 		try:
 			r,g,b,a = color
 			return r,g,b,a
@@ -367,6 +367,24 @@ class CssProperties(UserDict):
 			"normal": cairo.FONT_SLANT_NORMAL,
 			"italic": cairo.FONT_SLANT_ITALIC,
 		}[style]
+	
+	
+	def get_cairo_font_options(self, key="font-hinting", default="normal"):
+		"""Returns a FontOptions with the right hinting set"""
+		
+		import cairo
+		options = cairo.FontOptions()
+		hinting = self.get(key, default).lower()
+		options.set_hint_style({
+			"none": cairo.HINT_STYLE_NONE,
+			"slight": cairo.HINT_STYLE_SLIGHT,
+			"light": cairo.HINT_STYLE_SLIGHT,
+			"medium": cairo.HINT_STYLE_MEDIUM,
+			"full": cairo.HINT_STYLE_FULL,
+			"normal": cairo.HINT_STYLE_DEFAULT,
+			"default": cairo.HINT_STYLE_DEFAULT,
+		}[hinting])
+		return options
 	
 	
 	def get_font(self, key="font-family", default=None):

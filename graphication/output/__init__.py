@@ -15,20 +15,23 @@ class FileOutput(object):
 	
 	def __init__(self, style=None, padding=0):
 		self.style = default_css.merge(style)
-		self.items = {}
+		self.items = []
 		self.padding = padding
 	
 	
 	def add_item(self, item, x, y, width, height):
 		"""Adds an item to this Output. Pass in its position and size, as floats or ints."""
 		
-		self.items[item] = ((x,y), (width, height))
+		entry = (item, (x,y), (width, height))
+		
+		if entry not in self.items:
+			self.items.append(entry)
 	
 	
 	def calculate_size(self):
 		"""Calculates the bounds of the page"""
 		right, bottom = 0,0
-		for (x, y), (w, h) in self.items.values():
+		for item, (x, y), (w, h) in self.items:
 			if x + w > right:
 				right = x + w
 			if y + h > bottom:
@@ -38,7 +41,7 @@ class FileOutput(object):
 	
 	def render_loop(self, context):
 		"""Renders items in a generic fashion. Should be passed a context."""
-		for item, ((x, y), (w, h)) in self.items.items():
+		for item, (x, y), (w, h) in self.items:
 			context.save()
 			context.translate(x+self.padding, y+self.padding)
 			item.set_size(w, h)

@@ -50,6 +50,11 @@ class BaseScale(object):
 	def get_value(self, point):
 		
 		return (point * self.range) + self.min
+	
+	
+	def label_for(self, point):
+		
+		return ""
 
 
 class SimpleScale(BaseScale):

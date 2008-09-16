@@ -86,6 +86,17 @@ class DateScale(BaseScale):
 		elif self.step < 86400 * 365.25:
 			f = "%b"
 		return time.strftime(f, time.gmtime(date))
+	
+	
+	def transform_label(self, date):
+		"Overridable function for specifying label formats."
+		return date.strftime("%a")
+	
+	
+	def label_for(self, date):
+		if not hasattr(date, "strftime"):
+			date = datetime.datetime.fromtimestamp(date)
+		return self.transform_label(date)
 
 
 class AutoDateScale(DateScale):

@@ -6,7 +6,7 @@ def hex_to_rgba(color):
 	If passed an RGBA sequence, will return it normally.
 	"""
 	
-	if not isinstance(color, str) or isinstance(color, unicode):
+	if not (isinstance(color, str) or isinstance(color, unicode)):
 		try:
 			r,g,b,a = color
 			return r,g,b,a

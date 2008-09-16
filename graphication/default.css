@@ -5,6 +5,8 @@
 	background-color: #fff;
 	font-family: Sans;
 	font-style: normal;
+	line-height: 1;
+	font-size: 10;
 }
 
 canvas {
@@ -71,10 +73,3 @@ legend key {
 /*legend label {
 	font-size: 12;
 }*/
-
-barchart bar {
-	padding: 1;
-	padding-top: 2;
-	border-width: 1;
-	border-color: #0004;
-}

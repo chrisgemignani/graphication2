@@ -36,17 +36,23 @@ class BarChart(Graph):
 		
 		# Initialise the vertical scale
 		if stacked:
-			y_min, y_max = sys.maxint, 0
-			for series in self.series_set:
-				s_min, s_max = series.value_range()
-				y_min = min(s_min, y_min)
-				y_max += s_max
-			y_max -= y_min
+			y_min, y_max = self.stacked_value_range()
 		else:
 			y_min, y_max = self.series_set.value_range()
 		if self.zero_base:
 			y_min = 0
 		self.y_scale = VerticalWavegraphScale(y_min, y_max)
+	
+	
+	def stacked_value_range(self):
+		y_min, y_max = sys.maxint, 0
+		for series in self.series_set:
+			s_min, s_max = series.value_range()
+			y_min = min(s_min, y_min)
+			y_max += s_max
+		if not self.zero_base:
+			y_max -= y_min
+		return y_min, y_max
 	
 	
 	def calc_plot_size(self):
