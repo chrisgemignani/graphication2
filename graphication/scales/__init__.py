@@ -55,6 +55,11 @@ class BaseScale(object):
 	def label_for(self, point):
 		
 		return ""
+	
+	
+	def is_secondary(self, date):
+		
+		return False
 
 
 class SimpleScale(BaseScale):

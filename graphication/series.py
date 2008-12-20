@@ -43,16 +43,27 @@ class Series(object):
 	STYLE_LIGHT = 2
 	STYLE_VLIGHT = 3
 	STYLE_LINETOP = 4
+	STYLE_DOUBLEFILL = 5
+	STYLE_WHOLEFILL = 6
 	
-	def __init__(self, title, data, color="#000000ff", styles={}):
+	def __init__(self, title, data, color="#000000ff", styles={}, fill_color=None, line_width=None):
 		self.title = title
 		self.data = data
 		self.color = color.replace("#", "")
 		self.styles = styles
+		self.fill_color = fill_color
+		self.line_width = line_width
 	
 	
 	def color_as_rgba(self):
 		return hex_to_rgba(self.color)
+	
+	
+	def fill_color_as_rgba(self):
+		if self.fill_color:
+			return hex_to_rgba(self.fill_color)
+		else:
+			return None
 	
 	
 	def keys(self):
@@ -92,15 +103,26 @@ class Series(object):
 	
 	
 	def __getitem__(self, key):
-		return self.values[key]
+		return self.data[key]
 	
 	
 	def __len__(self):
 		return len(self.data)
 	
+	
 	def __str__(self):
 		kr = self.key_range()
 		return "%d values, keys between %s and %s" % (len(self), kr[0], kr[1]) 
+	
+	
+	def __sub__(self, other):
+		assert isinstance(other, Series)
+		newdata = dict([
+			(k, max(v - other[k], 0))
+			for k, v in self.data.items()
+		])
+		return Series(self.title, newdata, self.color, self.styles, self.fill_color)
+	
 	
 	def interpolate(self, key):
 		"""
@@ -212,8 +234,8 @@ class SeriesSet(object):
 	def key_range(self):
 		assert len(self.series) > 0, "Cannot find the range of an empty set."
 		mins, maxs = zip(*[series.key_range() for series in self.series])
-		mins = [m for m in mins if m is not None]
-		maxs = [m for m in maxs if m is not None]
+		mins = [m for m in mins if m]
+		maxs = [m for m in maxs if m]
 		return min(mins), max(maxs)
 	
 	

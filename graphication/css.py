@@ -277,7 +277,7 @@ class CssProperties(UserDict):
 			return default
 	
 	
-	def get_list(self, key, default=[]):
+	def get_list(self, key, default=""):
 		"""Like dict.get, but splits the result as a comma-separated list."""
 		return [x.strip() for x in self.get(key, default).split(",")]
 	
@@ -535,6 +535,23 @@ class CssStylesheet(object):
 		return new_stylesheet
 	
 	
+	def imerge(self, stylesheet=None):
+		
+		"""
+		Like merge, but affects this stylesheet.
+		
+		@param stylesheet: The stylesheet to update from.
+		@type stylesheet: CssStylesheet
+		"""
+		
+		# TODO: A more sophisticated update that removes duplicates.
+		if stylesheet is None:
+			return
+		else:
+			self.rules = self.rules + stylesheet.rules
+		self.rules.sort(key=lambda r: r.selector.specificity)
+	
+	
 	def __repr__(self):
 		return "<CssStylesheet; %i rules>" % len(self.rules)
 	
@@ -566,7 +583,7 @@ class CssStylesheet(object):
 		"""
 		
 		# Initialise loop vars
-		in_comment = in_declaration = False
+		in_comment = in_declaration = in_import = False
 		buffer = ""
 		key = value = None
 		
@@ -591,6 +608,24 @@ class CssStylesheet(object):
 						properties = {}
 						buffer = ""
 						in_declaration = True
+					
+					# Or perhaps an import?
+					elif buffer[-1] == "@":
+						buffer = ""
+						in_import = 1
+					
+					elif in_import == 1:
+						if buffer[-1] == " ":
+							buffer = ""
+							in_import = 2 # We're reading the RHS now
+					
+					elif in_import == 2:
+						if buffer[-1] == ";":
+							# Load the given CSS file, and merge it
+							tomerge = __import__(buffer[:-1]+"_css", {}, {}, ['s'])
+							self.imerge(tomerge)
+							buffer = ""
+							in_import = False
 				
 				# ...or outside one...
 				elif in_declaration:

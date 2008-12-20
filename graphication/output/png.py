@@ -24,6 +24,8 @@ def write(self, filename):
 	context.set_source_rgba(*self.style['canvas.png'].get_color("background-color"))
 	context.paint()
 	
+	context.set_antialias(cairo.ANTIALIAS_GRAY)
+	
 	# Do the rendering
 	self.render_loop(context)
 	

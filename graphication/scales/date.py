@@ -16,7 +16,7 @@ def timestamp_to_d(t):
 
 class DateScale(BaseScale):
 	
-	def __init__(self, min, max, step=None, padding=None, minor_step=None):
+	def __init__(self, min, max, step=None, padding=None, minor_step=None, highlight_weekends=False):
 		
 		"""
 		Constructor.
@@ -47,6 +47,7 @@ class DateScale(BaseScale):
 		self.range = float(self.max - self.min)
 		self.step = step
 		self.minor_step = minor_step
+		self.highlight_weekends = highlight_weekends
 	
 	
 	def get_lines(self):
@@ -73,17 +74,17 @@ class DateScale(BaseScale):
 	
 	
 	def niceify_date(self, date):
-		if self.step < 60:
+		if self.step <= 60:
 			f = "%H:%M:%S"
-		elif self.step < 3600:
+		elif self.step <= 3600:
 			f = "%H:%M"
-		elif self.step < 86400:
+		elif self.step <= 86400:
 			f = "%I%p %d %b"
-		elif self.step < 86400 * 7:
+		elif self.step <= 86400 * 7:
 			f = "%d %b"
-		elif self.step < 86400 * 29:
+		elif self.step <= 86400 * 29:
 			f = "%d %b"
-		elif self.step < 86400 * 365.25:
+		elif self.step <= 86400 * 365.25:
 			f = "%b"
 		return time.strftime(f, time.gmtime(date))
 	
@@ -97,6 +98,15 @@ class DateScale(BaseScale):
 		if not hasattr(date, "strftime"):
 			date = datetime.datetime.fromtimestamp(date)
 		return self.transform_label(date)
+	
+	
+	def is_secondary(self, date):
+		if self.highlight_weekends:
+			# True if this is a weekend
+			if not hasattr(date, "strftime"):
+				date = datetime.datetime.fromtimestamp(date)
+			return date.strftime("%w") in ['0', '6']
+		return False
 
 
 class AutoDateScale(DateScale):
@@ -152,8 +162,8 @@ def month_range(start, end):
 class AutoWeekDateScale(DateScale):
 	
 	"""
-	A special DateScale that takes in a SeriesSet and a step to
-	display with, rather than minima and maxima, and highlights
+	A special DateScale that takes in a SeriesSet to
+	display with, rather than minima and maxima and a step, and highlights
 	weeks with minor lines and months with major lines.
 	"""
 	

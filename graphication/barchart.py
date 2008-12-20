@@ -46,12 +46,14 @@ class BarChart(Graph):
 	
 	def stacked_value_range(self):
 		y_min, y_max = sys.maxint, 0
+		print self.series_set, self.series_set.series
 		for series in self.series_set:
 			s_min, s_max = series.value_range()
 			y_min = min(s_min, y_min)
 			y_max += s_max
 		if not self.zero_base:
 			y_max -= y_min
+		print y_min, y_max
 		return y_min, y_max
 	
 	

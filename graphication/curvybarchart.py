@@ -12,7 +12,7 @@ from graphication.barchart import BarChart
 
 class CurvyBarChart(BarChart):
 	
-	def __init__(self, series_set, scale, style=None, vertical_scale=None, zero_base=True, label_on=True, stacked=True):
+	def __init__(self, series_set, scale, style=None, vertical_scale=None, zero_base=True, label_on=True, stacked=True, sharp_edges=True, top_only=False, border_only=False):
 		
 		"""
 		Constructor; creates a new CurvyBarChart.
@@ -25,6 +25,9 @@ class CurvyBarChart(BarChart):
 		self.label_on = label_on
 		self.zero_base = zero_base
 		self.stacked = stacked
+		self.sharp_edges = sharp_edges
+		self.top_only = top_only
+		self.border_only = border_only
 		
 		if vertical_scale is None:
 			if stacked:
@@ -44,10 +47,19 @@ class CurvyBarChart(BarChart):
 		self.plot_top = 0
 	
 	
+	def get_vertical_scale(self):
+		return self.y_scale
+	
+	
 	def draw_rounded_bar(self, context, x, y, w, h, top, bottom):
 		r = w / 2.0
 		rt = r * top
 		rb = r * bottom
+		
+		if not self.sharp_edges:
+			x = int(x)
+			w = math.ceil(w)
+		
 		# Draw rounded rectangle
 		context.move_to(x, y+rt)
 		
@@ -71,7 +83,7 @@ class CurvyBarChart(BarChart):
 		### Draw the bars
 		# Get width per bar block
 		keys = self.series_set.keys()
-		per_bar = self.plot_width / len(keys)
+		per_bar = float(self.plot_width) / len(keys)
 		# Some more drawing parameters
 		zero_line = self.plot_top + self.plot_height
 		bar_style = self.style["curvybarchart bar"]
@@ -100,25 +112,38 @@ class CurvyBarChart(BarChart):
 					height + bar_padding_top,
 				)
 				y, h = y + h, abs(h)
-				self.draw_rounded_bar(
-					context,
-					x, y, w, h,
-					bar_style.get_float('curve-top'),
-					bar_style.get_float('curve-bottom'),
-				)
-				# Fill it with the right colour
-				context.fill()
-				# Stroke round it
+				# Set stroke width
 				bwidth = bar_style.get_float("border-width", 0)
-				self.draw_rounded_bar(
-					context,
-					x + bwidth/2.0, y + bwidth/2.0, w - bwidth, h - bwidth,
-					bar_style.get_float('curve-top'),
-					bar_style.get_float('curve-bottom'),
-				)
-				context.set_source_rgba(*bar_style.get_color("border-color", "#0000"))
 				context.set_line_width(bwidth)
-				context.stroke()
+				# If we're only drawing the top, just draw it
+				if self.top_only:
+					context.set_source_rgba(*series.color_as_rgba())
+					context.move_to(x, y)
+					context.line_to(x+w, y)
+					context.stroke()
+					return
+				if height:
+					self.draw_rounded_bar(
+						context,
+						x, y, w, h,
+						bar_style.get_float('curve-top'),
+						bar_style.get_float('curve-bottom'),
+					)
+					# Fill it with the right colour
+					if not self.border_only:
+						context.fill()
+					# Stroke round it
+					self.draw_rounded_bar(
+						context,
+						x + bwidth/2.0, y + bwidth/2.0, w - bwidth, h - bwidth,
+						bar_style.get_float('curve-top'),
+						bar_style.get_float('curve-bottom'),
+					)
+					if self.border_only:
+						context.set_source_rgba(*series.color_as_rgba())
+					else:
+						context.set_source_rgba(*bar_style.get_color("border-color", "#0000"))
+					context.stroke()
 				# Draw numeric label on bar if req'd
 				if self.label_on:
 					context.select_font_face(
@@ -182,7 +207,10 @@ class CurvyBarChart(BarChart):
 				label_style.get_float('curve-top'),
 				label_style.get_float('curve-bottom'),
 			)
-			context.set_source_rgba(*label_style.get_color("background-color"))
+			if self.scale.is_secondary(key):
+				context.set_source_rgba(*label_style.get_color("background2-color", label_style.get_color("background-color")))
+			else:
+				context.set_source_rgba(*label_style.get_color("background-color"))
 			context.fill()
 			# Draw text
 			context.select_font_face(
@@ -195,7 +223,7 @@ class CurvyBarChart(BarChart):
 			labels = label.split("\n")
 			size = label_style.get_float("font-size")
 			bh = size * label_style.get_float("line-height")
-			by = y + (self.label_height - bh) / 2.0 + label_style.get_float("padding-top")
+			by = y + bh + label_style.get_float("padding-top")
 			cx = x + w/2.0
 			for label in labels:
 				context.set_font_size(size)
@@ -207,6 +235,11 @@ class CurvyBarChart(BarChart):
 				by += bh
 			
 			left += per_bar
+		
+		# Debug: outlines plot area
+		#context.set_source_rgba(255,255,255,255)
+		#context.rectangle(0, 0, self.width, self.plot_height)
+		#context.stroke()
 		
 		context.restore()
 
