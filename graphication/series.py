@@ -13,7 +13,7 @@ class OrderedDict(object):
 	
 	def order(self):
 		self.ordered = self.dict.keys()
-		self.ordered.order()
+		self.ordered.sort()
 	
 	def keys(self):
 		return self.ordered
